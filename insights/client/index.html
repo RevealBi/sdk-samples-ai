@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reveal Sdk - Web Component</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        #revealView {
+            flex: 1;
+            height: 100%;
+            min-width: 0;
+        }
+
+        .console-panel {
+            flex: 0 0 600px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f9f9f9;
+            overflow: hidden;
+        }
+
+        .console-header {
+            padding: 10px 15px;
+            background: #2c3e50;
+            color: white;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .streaming-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .streaming-toggle input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .console-content {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .console-content h1,
+        .console-content h2,
+        .console-content h3 {
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+        }
+
+        .console-content p {
+            margin: 0.5em 0;
+            line-height: 1.6;
+        }
+
+        .console-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .console-content pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .console-content ul,
+        .console-content ol {
+            margin: 0.5em 0;
+            padding-left: 1.5em;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <div id="revealView"></div>
+        <div class="console-panel">
+            <div class="console-header">
+                <span>AI Insights Explanation</span>
+                <label class="streaming-toggle">
+                    <input type="checkbox" id="streamingToggle" checked>
+                    <span>Stream</span>
+                </label>
+            </div>
+            <div class="console-content" id="consoleOutput"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+    <script src="https://dl.revealbi.io/reveal/libs/1.8.1/infragistics.reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@revealbi/api@0.0.1-preview.1/dist/index.umd.min.js"></script>
+
+    <script type="text/javascript">
+
+        //set this to your server url
+        $.ig.RevealSdkSettings.setBaseUrl("https://localhost:5111/");
+
+        // Initialize once at app startup (e.g., in main.ts or App.tsx)
+        rv.RevealSdkClient.initialize({
+            hostUrl: 'https://localhost:5111/'
+        });
+
+        const client = rv.RevealSdkClient.getInstance();
+        var revealView;
+        let streamingBuffer = '';
+
+        // Function to append streaming markdown text to console
+        function appendToConsole(markdownText, isStreaming = false) {
+            const consoleOutput = document.getElementById('consoleOutput');
+            if (isStreaming) {
+                streamingBuffer += markdownText;
+                const htmlContent = marked.parse(streamingBuffer);
+                consoleOutput.innerHTML = htmlContent;
+            } else {
+                const htmlContent = marked.parse(markdownText);
+                consoleOutput.innerHTML = htmlContent;
+            }
+            // Auto-scroll to bottom
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        // Function to clear console
+        function clearConsole() {
+            document.getElementById('consoleOutput').innerHTML = '';
+            streamingBuffer = '';
+        }
+
+        // Helper function to create insight menu items
+        function createInsightMenuItem(label, dashboard, insightType, visualizationId = null) {
+            return new $.ig.RVMenuItem(label, null, async () => {
+                clearConsole();
+                const streamingEnabled = document.getElementById('streamingToggle').checked;
+                
+                const options = {
+                    dashboard: dashboard,
+                    insightType: insightType
+                };
+                if (visualizationId) {
+                    options.visualizationId = visualizationId;
+                }
+
+                if (streamingEnabled) {
+                    const result = await client.ai.insights.get(
+                        options,
+                        {
+                            onProgress: (message) => {
+                                console.log(`[Insight Progress]:`, message);
+                                appendToConsole(`*${message}*\n\n`, true);
+                            },
+                            onTextChunk: (text) => {
+                                console.log(`[Insight Text Chunk]:`, text);
+                                appendToConsole(text, true);
+                            },
+                            onComplete: () => {
+                                console.log('Insight generation complete');
+                            }
+                        },
+                        {
+                            streamExplanation: true
+                        }
+                    );
+                    console.log('AI Insight Result:', result);
+                } else {
+                    const result = await client.ai.insights.get(options);
+                    appendToConsole(result.explanation);
+                }
+            });
+        }
+
+        $.ig.RVDashboard.loadDashboard("Accounts", async (dashboard) => {
+            revealView = new $.ig.RevealView("#revealView");
+            revealView.canEdit = false;
+            revealView.canSaveAs = false;
+            revealView.showRefresh = false;
+            revealView.canCopyVisualization = false;
+            revealView.dashboard = dashboard;
+            revealView.onMenuOpening = function (visualization, args) {
+                if (args.menuLocation === $.ig.RVMenuLocation.Dashboard) {
+                    args.menuItems.push(createInsightMenuItem("Dashboard Summary", dashboard, rv.InsightType.Summary));
+                    args.menuItems.push(createInsightMenuItem("Dashboard Analysis", dashboard, rv.InsightType.Analysis));
+                    args.menuItems.push(createInsightMenuItem("Dashboard Forecast", dashboard, rv.InsightType.Forecast));
+                }
+                if (args.menuLocation === $.ig.RVMenuLocation.Visualization) {
+                    args.menuItems.push(createInsightMenuItem("Visualization Summary", dashboard, rv.InsightType.Summary, visualization.id));
+                    args.menuItems.push(createInsightMenuItem("Visualization Analysis", dashboard, rv.InsightType.Analysis, visualization.id));
+                    args.menuItems.push(createInsightMenuItem("Visualization Forecast", dashboard, rv.InsightType.Forecast, visualization.id));
+                }
+            };
+        });
+
+    </script>
+</body>
+
+</html>
