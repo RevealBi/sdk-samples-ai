@@ -1,10 +1,20 @@
 using Reveal.Sdk;
 using Reveal.Sdk.AI;
+using RevealSdkServer.Reveal;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers().AddReveal();
-builder.Services.AddRevealAI();
+builder.Services.AddControllers().AddReveal(builder =>
+{
+    builder.AddDataSourceProvider<DataSourceProvider>();
+});
+
+builder.Services.AddRevealAI()
+    .ConfigureOpenAI(settings =>
+    {
+        settings.ApiKey = builder.Configuration["RevealAI:OpenAI:ApiKey"];
+        settings.ModelId = "gpt-4.1";
+    });
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

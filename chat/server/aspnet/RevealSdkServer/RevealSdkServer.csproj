@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Reveal.Sdk.AI.AspNetCore" Version="0.1.9-preview" />
+    <PackageReference Include="Reveal.Sdk.AI.AspNetCore" Version="0.1.12-preview" />
     <PackageReference Include="Reveal.Sdk.AspNetCore" Version="1.8.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
