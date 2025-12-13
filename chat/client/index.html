@@ -6,378 +6,33 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reveal AI Chat</title>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-            background: #f5f5f5;
-            overflow: hidden;
-        }
-
-        .container {
-            display: flex;
-            height: 100vh;
-            background: white;
-        }
-
-        /* Chat Panel - Left Side */
-        .chat-panel {
-            flex: 0 0 45%;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #e5e5e5;
-            background: white;
-        }
-
-        .chat-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid #e5e5e5;
-            background: white;
-        }
-
-        .chat-header h1 {
-            font-size: 20px;
-            font-weight: 600;
-            color: #2d3748;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .chat-header .logo {
-            font-size: 24px;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .chat-message {
-            display: flex;
-            gap: 12px;
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message-avatar {
-            flex-shrink: 0;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .user-avatar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .assistant-avatar {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-
-        .system-avatar {
-            background: #e2e8f0;
-            color: #4a5568;
-            font-size: 14px;
-        }
-
-        .log-avatar {
-            background: #bee3f8;
-            color: #2c5282;
-            font-size: 14px;
-        }
-
-        .error-avatar {
-            background: #fed7d7;
-            color: #c53030;
-            font-size: 14px;
-        }
-
-        .message-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .message-role {
-            font-size: 12px;
-            font-weight: 600;
-            color: #718096;
-            margin-bottom: 6px;
-            text-transform: capitalize;
-        }
-
-        .message-text {
-            color: #2d3748;
-            line-height: 1.6;
-            font-size: 15px;
-        }
-
-        .message-text.streaming {
-            border-left: 3px solid #667eea;
-            padding-left: 12px;
-        }
-
-        .message-text h1,
-        .message-text h2,
-        .message-text h3 {
-            margin-top: 16px;
-            margin-bottom: 8px;
-            color: #1a202c;
-        }
-
-        .message-text h1 {
-            font-size: 24px;
-        }
-
-        .message-text h2 {
-            font-size: 20px;
-        }
-
-        .message-text h3 {
-            font-size: 18px;
-        }
-
-        .message-text p {
-            margin: 8px 0;
-        }
-
-        .message-text code {
-            background: #f7fafc;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
-            font-size: 14px;
-            color: #e53e3e;
-        }
-
-        .message-text pre {
-            background: #2d3748;
-            color: #e2e8f0;
-            padding: 16px;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin: 12px 0;
-        }
-
-        .message-text pre code {
-            background: none;
-            padding: 0;
-            color: #e2e8f0;
-        }
-
-        .message-text ul,
-        .message-text ol {
-            margin: 8px 0;
-            padding-left: 24px;
-        }
-
-        .message-text li {
-            margin: 4px 0;
-        }
-
-        .message-text blockquote {
-            border-left: 4px solid #e2e8f0;
-            padding-left: 16px;
-            margin: 12px 0;
-            color: #4a5568;
-        }
-
-        .message-text.system {
-            color: #4a5568;
-            font-style: italic;
-        }
-
-        .message-text.log {
-            color: #2c5282;
-            font-size: 13px;
-        }
-
-        .message-text.error {
-            color: #c53030;
-            background: #fff5f5;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 3px solid #fc8181;
-        }
-
-        .chat-input-container {
-            padding: 20px 24px;
-            border-top: 1px solid #e5e5e5;
-            background: white;
-        }
-
-        .chat-input-wrapper {
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 15px;
-            font-family: inherit;
-            resize: none;
-            min-height: 50px;
-            max-height: 200px;
-            transition: border-color 0.2s;
-        }
-
-        .chat-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .chat-input::placeholder {
-            color: #a0aec0;
-        }
-
-        .send-button {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            white-space: nowrap;
-        }
-
-        .send-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .send-button:active {
-            transform: translateY(0);
-        }
-
-        .send-button:disabled {
-            background: #cbd5e0;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Dashboard Panel - Right Side */
-        .dashboard-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #fafafa;
-            min-width: 0;
-        }
-
-        .dashboard-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid #e5e5e5;
-            background: white;
-        }
-
-        .dashboard-header h2 {
-            font-size: 16px;
-            font-weight: 600;
-            color: #4a5568;
-        }
-
-        #revealView {
-            flex: 1;
-            width: 100%;
-            background: white;
-        }
-
-        /* Empty state */
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #a0aec0;
-            text-align: center;
-            padding: 40px;
-        }
-
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        .empty-state h3 {
-            font-size: 20px;
-            margin-bottom: 8px;
-            color: #718096;
-        }
-
-        .empty-state p {
-            font-size: 14px;
-            max-width: 400px;
-        }
-
-        /* Scrollbar styling */
-        .chat-messages::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .chat-messages::-webkit-scrollbar-track {
-            background: #f7fafc;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: #cbd5e0;
-            border-radius: 4px;
-        }
-
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: #a0aec0;
-        }
-    </style>
-
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
     <div class="container">
         <!-- Chat Panel -->
         <div class="chat-panel">
-            <div class="chat-header">
-                <h1><span class="logo">💬</span> Reveal AI Chat</h1>
-            </div>
             <div class="chat-messages" id="chatMessages">
                 <div class="empty-state">
                     <div class="empty-state-icon">🚀</div>
                     <h3>Start a conversation</h3>
                     <p>Ask questions about your data and I'll help you create insightful dashboards and visualizations.</p>
+                    <div class="suggested-questions" id="suggestedQuestions">
+                        <!-- Suggested questions will be inserted here -->
+                    </div>
+                </div>
+            </div>
+            <div class="suggestions-panel" id="suggestionsPanel">
+                <div class="suggestions-header" id="suggestionsHeader">
+                    <div class="suggestions-title">
+                        <span>💡</span>
+                        <span>Try asking...</span>
+                    </div>
+                    <div class="suggestions-toggle" id="suggestionsToggle">▼</div>
+                </div>
+                <div class="suggestions-content" id="suggestionsContent">
+                    <!-- Quick suggestions will be inserted here -->
                 </div>
             </div>
             <div class="chat-input-container">
@@ -390,9 +45,6 @@
 
         <!-- Dashboard Panel -->
         <div class="dashboard-panel">
-            <div class="dashboard-header">
-                <h2>📊 Dashboard Viewer</h2>
-            </div>
             <div id="revealView"></div>
         </div>
     </div>
@@ -402,7 +54,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
     <script src="https://dl.revealbi.io/reveal/libs/1.8.1/infragistics.reveal.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@revealbi/api@0.0.1-preview.1/dist/index.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@revealbi/api@0.0.1-preview.2/dist/index.umd.min.js"></script>
 
     <script type="text/javascript">
         // Configure Reveal SDK
@@ -421,6 +73,136 @@
         const chatMessages = document.getElementById('chatMessages');
         const chatInput = document.getElementById('chatInput');
         const sendButton = document.getElementById('sendButton');
+        const suggestedQuestionsContainer = document.getElementById('suggestedQuestions');
+        const suggestionsPanel = document.getElementById('suggestionsPanel');
+        const suggestionsContent = document.getElementById('suggestionsContent');
+        const suggestionsHeader = document.getElementById('suggestionsHeader');
+        const suggestionsToggle = document.getElementById('suggestionsToggle');
+
+        // Initial dashboard creation questions (always visible)
+        const initialQuestions = [
+            "Create an executive dashboard showing total revenue, gross margin, and average GM% over time",
+            "Show a KPI dashboard comparing actual revenue vs revenue budget by month",
+            "Give me a year-over-year comparison dashboard for revenue and gross margin",
+            "Create a map showing total revenue by state",
+            "Build a dashboard with total revenue, total gross margin, and average revenue per company"
+        ];
+
+        // Categorized questions (shown when user clicks "Show more examples")
+        const categorizedQuestions = {
+            "Time-Series & Trends": [
+                "Show a line chart of revenue over time, grouped by year",
+                "Create a trend chart comparing actual revenue vs revenue budget over time",
+                "Show monthly gross margin trends with GM% as a secondary axis",
+                "Plot revenue and gross margin trends for the last 12 months"
+            ],
+            "Budget vs Actual": [
+                "Create a bar chart showing revenue vs budget by month",
+                "Which months exceeded revenue budget and by how much?",
+                "Show a variance dashboard comparing revenue vs revenue budget LY",
+                "Which companies consistently beat their revenue budget?"
+            ],
+            "Company Analysis": [
+                "Rank companies by total revenue",
+                "Show the top 10 companies by gross margin",
+                "Create a dashboard showing revenue per company by division",
+                "Which companies have the highest and lowest GM%?"
+            ],
+            "Geographic Analysis": [
+                "Which states generate the highest gross margin?",
+                "Show revenue per company by state",
+                "Compare GM% across states",
+                "Which states underperform against revenue budget?"
+            ],
+            "Division Performance": [
+                "Compare total revenue and gross margin by division",
+                "Which division has the highest average GM%?",
+                "Show revenue trends over time split by division",
+                "Create a stacked bar chart of revenue by division and state"
+            ],
+            "Profitability & Margins": [
+                "Create a scatter plot of revenue vs gross margin by company",
+                "Which companies generate high revenue but low GM%?",
+                "Show gross margin trends compared to last year",
+                "Which states have the best gross margin efficiency?"
+            ],
+            "Anomalies & Insights": [
+                "Identify revenue anomalies or unusual spikes over time",
+                "Which companies are outliers in gross margin performance?",
+                "Find states with declining revenue but increasing GM%",
+                "Detect months where revenue significantly deviated from budget"
+            ]
+        };
+
+        // Initialize suggested questions
+        function initializeSuggestedQuestions() {
+            // Add initial questions
+            initialQuestions.forEach(question => {
+                const button = document.createElement('button');
+                button.className = 'suggested-question';
+                button.textContent = question;
+                button.addEventListener('click', () => {
+                    chatInput.value = question;
+                    handleSendChat();
+                });
+                suggestedQuestionsContainer.appendChild(button);
+            });
+
+            // Add "Show more" button
+            const showMoreBtn = document.createElement('button');
+            showMoreBtn.className = 'show-more-btn';
+            showMoreBtn.textContent = 'Show more examples...';
+            showMoreBtn.addEventListener('click', toggleCategorizedQuestions);
+            suggestedQuestionsContainer.appendChild(showMoreBtn);
+
+            // Create categorized questions container (hidden initially)
+            const categoriesContainer = document.createElement('div');
+            categoriesContainer.className = 'question-categories';
+            categoriesContainer.id = 'questionCategories';
+
+            Object.keys(categorizedQuestions).forEach(category => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'question-category';
+
+                const categoryHeader = document.createElement('div');
+                categoryHeader.className = 'category-header';
+                categoryHeader.textContent = category;
+                categoryDiv.appendChild(categoryHeader);
+
+                categorizedQuestions[category].forEach(question => {
+                    const button = document.createElement('button');
+                    button.className = 'suggested-question';
+                    button.textContent = question;
+                    button.addEventListener('click', () => {
+                        chatInput.value = question;
+                        handleSendChat();
+                    });
+                    categoryDiv.appendChild(button);
+                });
+
+                categoriesContainer.appendChild(categoryDiv);
+            });
+
+            suggestedQuestionsContainer.appendChild(categoriesContainer);
+        }
+
+        // Toggle categorized questions visibility
+        function toggleCategorizedQuestions() {
+            const categoriesContainer = document.getElementById('questionCategories');
+            const showMoreBtn = document.querySelector('.show-more-btn');
+            
+            if (categoriesContainer.classList.contains('visible')) {
+                categoriesContainer.classList.remove('visible');
+                showMoreBtn.textContent = 'Show more examples...';
+            } else {
+                categoriesContainer.classList.add('visible');
+                showMoreBtn.textContent = 'Show less';
+                // Scroll to top to show the categories
+                setTimeout(() => {
+                    chatMessages.scrollTop = 0;
+                }, 100);
+            }
+        }
 
         // Initialize RevealView
         function initializeDashboard() {
@@ -432,6 +214,42 @@
         }
 
         initializeDashboard();
+        initializeSuggestedQuestions();
+        initializePersistentSuggestions();
+
+        // Initialize persistent suggestions panel
+        function initializePersistentSuggestions() {
+            // Combine a selection of questions for quick access
+            const quickSuggestions = [
+                ...initialQuestions.slice(0, 3),
+                ...categorizedQuestions['Time-Series & Trends'].slice(0, 2),
+                ...categorizedQuestions['Company Analysis'].slice(0, 2),
+                ...categorizedQuestions['Geographic Analysis'].slice(0, 1)
+            ];
+
+            quickSuggestions.forEach(question => {
+                const chip = document.createElement('button');
+                chip.className = 'suggestion-chip';
+                chip.textContent = question;
+                chip.title = question; // Show full text on hover
+                chip.addEventListener('click', () => {
+                    chatInput.value = question;
+                    chatInput.focus();
+                });
+                suggestionsContent.appendChild(chip);
+            });
+
+            // Toggle suggestions panel
+            suggestionsHeader.addEventListener('click', () => {
+                suggestionsContent.classList.toggle('collapsed');
+                suggestionsToggle.classList.toggle('collapsed');
+            });
+        }
+
+        // Show persistent suggestions panel when conversation starts
+        function showPersistentSuggestions() {
+            suggestionsPanel.classList.add('visible');
+        }
 
         // Add chat message to UI
         function addChatMessage(role, content) {
@@ -439,6 +257,7 @@
             const emptyState = chatMessages.querySelector('.empty-state');
             if (emptyState) {
                 emptyState.remove();
+                showPersistentSuggestions();
             }
 
             const messageDiv = document.createElement('div');
@@ -491,7 +310,6 @@
             try {
                 const json = JSON.parse(dashboardJson);
                 revealView.dashboard = await $.ig.RevealUtility.createDashboardFromJsonObject(json);
-                addChatMessage('system', '📊 Dashboard loaded successfully');
             } catch (e) {
                 console.error('Failed to load dashboard:', e);
                 addChatMessage('error', 'Failed to load dashboard: ' + e.message);
@@ -520,68 +338,67 @@
                     {
                         question,
                         datasourceId: 'SampleExcel',
-                        databaseId: 'SampleExcel',
                         dashboard: revealView.dashboard,
-                        //streamExplanation: true
+                        streamExplanation: true
                     },
-                    // {
-                    //     onProgress: (message) => {
-                    //         // Show progress messages as log entries
-                    //         addChatMessage('log', message);
-                    //     },
-                    //     onTextChunk: (chunk) => {
-                    //         // Handle streaming text chunks (like ChatGPT)
-                    //         streamedExplanation += chunk;
+                    {
+                        onProgress: (message) => {
+                            // Show progress messages as log entries
+                            addChatMessage('log', message);
+                        },
+                        onTextChunk: (chunk) => {
+                            // Handle streaming text chunks (like ChatGPT)
+                            streamedExplanation += chunk;
 
-                    //         // Create or update the streaming message div
-                    //         if (!streamingMessageDiv) {
-                    //             streamingMessageDiv = createStreamingMessage();
-                    //         }
-                    //         // Update the content with parsed markdown
-                    //         streamingMessageDiv.innerHTML = marked.parse(streamedExplanation);
-                    //         chatMessages.scrollTop = chatMessages.scrollHeight;
-                    //     },
-                    //     onError: (error, details) => {
-                    //         console.error('Chat error:', error, details);
-                    //         addChatMessage('error', error);
-                    //     },
-                    //     onComplete: (message, result) => {
-                    //         console.log('Chat complete:', message);
+                            // Create or update the streaming message div
+                            if (!streamingMessageDiv) {
+                                streamingMessageDiv = createStreamingMessage();
+                            }
+                            // Update the content with parsed markdown
+                            streamingMessageDiv.innerHTML = marked.parse(streamedExplanation);
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                        },
+                        onError: (error, details) => {
+                            console.error('Chat error:', error, details);
+                            addChatMessage('error', error);
+                        },
+                        onComplete: (message, result) => {
+                            console.log('Chat complete:', message);
 
-                    //         // If we received streamed text, mark the streaming div as complete
-                    //         if (streamingMessageDiv) {
-                    //             streamingMessageDiv.classList.remove('streaming');
-                    //             streamingMessageDiv.style.borderLeft = '3px solid #28a745';
-                    //         }
+                            // If we received streamed text, mark the streaming div as complete
+                            if (streamingMessageDiv) {
+                                streamingMessageDiv.classList.remove('streaming');
+                                streamingMessageDiv.classList.add('completed');
+                            }
 
-                    //         // Load dashboard if included in the result
-                    //         if (result?.dashboard) {
-                    //             loadDashboardFromResponse(result.dashboard);
-                    //         }
-                    //     }
-                    // }
+                            // Load dashboard if included in the result
+                            if (result?.dashboard) {
+                                loadDashboardFromResponse(result.dashboard);
+                            }
+                        }
+                    }
                 );
 
                 // Handle case where no streaming occurred (fallback to final response)
-                // if (!streamingMessageDiv && response.explanation) {
-                //     const htmlContent = marked.parse(response.explanation);
-                //     addChatMessage('assistant', htmlContent);
-                // }
+                if (!streamingMessageDiv && response.explanation) {
+                    const htmlContent = marked.parse(response.explanation);
+                    addChatMessage('assistant', htmlContent);
+                }
 
-                // if (response.error) {
-                //     addChatMessage('error', response.error);
-                // }
+                if (response.error) {
+                    addChatMessage('error', response.error);
+                }
 
                 // // Load dashboard if present and not already loaded via onComplete
-                // if (response.dashboard && !streamingMessageDiv) {
-                //     await loadDashboardFromResponse(response.dashboard);
-                // }
+                if (response.dashboard && !streamingMessageDiv) {
+                    await loadDashboardFromResponse(response.dashboard);
+                }
             } catch (error) {
-            //addChatMessage('error', `Error: ${error.message}`);
+                addChatMessage('error', `Error: ${error.message}`);
             } finally {
                 // Re-enable send button
-                // sendButton.disabled = false;
-                // chatInput.focus();
+                sendButton.disabled = false;
+                chatInput.focus();
             }
         }
 

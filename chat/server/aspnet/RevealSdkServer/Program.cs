@@ -3,7 +3,11 @@ using Reveal.Sdk.AI;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers().AddReveal();
+builder.Services.AddControllers().AddReveal(builder =>
+{
+    builder.AddUserContextProvider<RevealSdkServer.Reveal.UserContextProvider>();
+    builder.AddDataSourceProvider<RevealSdkServer.Reveal.DataSourceProvider>();
+});
 builder.Services.AddRevealAI();
 
 builder.Services.AddControllers();
