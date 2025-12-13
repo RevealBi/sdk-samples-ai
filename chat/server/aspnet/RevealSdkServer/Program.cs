@@ -1,14 +1,12 @@
 using Reveal.Sdk;
 using Reveal.Sdk.AI;
-using RevealSdkServer.Reveal;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers().AddReveal(builder =>
 {
-    builder.AddDataSourceProvider<DataSourceProvider>();
+    builder.AddDataSourceProvider<RevealSdkServer.Reveal.DataSourceProvider>();
 });
-
 builder.Services.AddRevealAI()
     .ConfigureOpenAI(settings =>
     {

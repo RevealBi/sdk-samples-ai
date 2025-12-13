@@ -13,14 +13,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Dashboards\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Data\NorthwindInvoices.xlsx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>
