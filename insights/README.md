@@ -1,6 +1,6 @@
-# Chat Sample - Quick Start Guide
+# Insights Sample - Quick Start Guide
 
-This sample demonstrates the Reveal SDK AI chat functionality.
+This sample demonstrates the Reveal SDK AI insights functionality.
 
 ## Prerequisites
 

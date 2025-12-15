@@ -48,4 +48,4 @@ You can also override/set these options during setup, like so:
 
 ## Note
 
-During first startup, the metadata for your datasource will be indexed, which means that for a couple of minutes the dashboard generation features will be unavailable (you'll receive an error in the chat indicating that's the case). Once indexing is complete, dashboard generation will work as intended.
+During first startup, metadata generation will run for your configured datasource. While indexing is ongoing dashboard generation features will be unavailable. You will receive a corresponding error in the chat if you try to use them. Once indexing is complete (usually takes just a couple of minutes) dashboard generation will work as intended.
