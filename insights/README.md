@@ -29,7 +29,7 @@ Set the following configuration in your user secrets. Only configure the AI mode
 You can also override/set these options during setup, like so:
 
 ```
-    .ConfigureOpenAI(settings =>
+    builder.Services.AddRevealAI().ConfigureOpenAI(settings =>
     {
         settings.ApiKey = builder.Configuration["RevealAI:OpenAI:ApiKey"];
         settings.ModelId = "gpt-4.1";
