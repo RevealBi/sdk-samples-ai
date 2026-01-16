@@ -43,7 +43,7 @@ The AI Add-On requires datasources that support metadata generation. The followi
 | **PostgreSQL** | `PostgreSQL` | Full support |
 | **Snowflake** | `Snowflake` | Full support |
 | **Amazon Athena** | `AmazonAthena` | Full support |
-| **SQL Server Analysis Services** | `SSAS` | Use `AzureAnalysisServices` for Azure |
+| **SQL Server Analysis Services** | `SSAS` or `SSASHTTP` | Use appropriate provider name for your configuration or `AzureAnalysisServices` for Azure |
 | **Excel Files** | `Excel` | Single-table scenarios |
 | **CSV Files** | `CSV` | Single-table scenarios |
 
@@ -51,7 +51,7 @@ The AI Add-On requires datasources that support metadata generation. The followi
 - **Schema Size**: Databases with < 100 tables recommended for best performance
 - **Large Databases**: Use metadata whitelisting for databases with 500+ tables
 - **File-Based**: Excel and CSV work best for single-table scenarios without joins
-- **Other Datasources**: Datasources not listed above may not support metadata generation and may not work with the AI Add-On
+- **Other Datasources**: Datasources not listed above may not support metadata generation and may not work with all the AI Add-On features
 
 ---
 
