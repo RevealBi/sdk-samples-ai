@@ -64,10 +64,10 @@ dotnet build
 If using the JavaScript API:
 
 ```bash
-npm install @revealbi/ai@0.0.1-preview.2
+npm install @revealbi/api@0.0.1-preview.2
 ```
 
-See the [@revealbi/ai npm package README](https://www.npmjs.com/package/@revealbi/api) for client-side usage.
+See the [@revealbi/api npm package README](https://www.npmjs.com/package/@revealbi/api) for client-side usage.
 
 ---
 
