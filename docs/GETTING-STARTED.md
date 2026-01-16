@@ -162,7 +162,7 @@ The AI needs metadata about your datasources. Add to `appsettings.json`:
     "DefaultClient": "openai",
     "OpenAI": {
       "ApiKey": "OPENAI_API_KEY",
-      "ModelId": "gpt-4-turbo"
+      "ModelId": "gpt-4.1"
     },
 
     "MetadataService": {
@@ -197,12 +197,14 @@ dotnet run
 Watch console output for metadata generation:
 
 ```
-[Reveal.AI] Starting metadata generation for datasource: my-datasource-id
-[Reveal.AI] Discovered 25 tables in database: MyDB
-[Reveal.AI] Generating metadata for table: Orders (1/25)
+MetadataGenerationHostedService starting
+Triggering metadata initialization on startup
 ...
-[Reveal.AI] Metadata generation complete
-[Reveal.AI] Metadata files saved to: C:\Users\{User}\.reveal\ai\metadata\
+Generating metadata for datasource my-datasource-id
+Enriching metadata for datasource my-datasource-id
+...
+Metadata initialization completed. Metadata is now ready.
+Startup metadata initialization completed
 ```
 
 **Verify metadata files were created:**
