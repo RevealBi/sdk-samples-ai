@@ -11,7 +11,7 @@ This guide will walk you through setting up the Reveal AI Add-On in your existin
 ## Prerequisites
 
 - ✅ **Private preview access** granted by your Reveal sales representative
-- ✅ **NuGet package zip file** provided by Reveal
+- ✅ **NuGet feed credentials** (username and password will be provided during the AI Preview Kickoff meeting)
 - ✅ **Reveal SDK v1.8.3+** installed and working in your ASP.NET Core app
 - ✅ **.NET 8.0 SDK** installed
 - ✅ **LLM Provider account** (OpenAI or Anthropic recommended)
@@ -21,45 +21,44 @@ This guide will walk you through setting up the Reveal AI Add-On in your existin
 
 ## Step 1: Install NuGet Package
 
-### 1a. Extract the Package
+### 1a. Add Reveal AI NuGet Feed
 
-Extract the zip file provided by your sales rep to a local folder:
-
-```bash
-# Windows
-mkdir C:\RevealAI-NuGet
-# Extract Reveal.Sdk.AI.AspNetCore.0.1.27-preview.nupkg to this folder
-
-# Linux/Mac
-mkdir ~/RevealAI-NuGet
-# Extract Reveal.Sdk.AI.AspNetCore.0.1.27-preview.nupkg to this folder
-```
-
-### 1b. Add Local NuGet Source
+Add the Reveal AI NuGet feed to your project. You'll need the username and password provided during your AI Preview Kickoff meeting.
 
 ```bash
-# Windows
-dotnet nuget add source C:\RevealAI-NuGet --name RevealAI-Local
-
-# Linux/Mac
-dotnet nuget add source ~/RevealAI-NuGet --name RevealAI-Local
+dotnet nuget add source https://f.feedz.io/reveal/reveal-feed/nuget/index.json \
+  --name RevealAI \
+  --username YOUR_USERNAME \
+  --password YOUR_PASSWORD \
+  --store-password-in-clear-text
 ```
 
 **Verify:**
 ```bash
 dotnet nuget list source
-# Should show: RevealAI-Local [Enabled]
+# Should show: RevealAI [Enabled]
 ```
 
-### 1c. Install the Package
+### 1b. Install the Package
+
+**Using .NET CLI:**
 
 ```bash
 cd YourProject
-dotnet add package Reveal.Sdk.AI.AspNetCore --version 0.1.27-preview
+dotnet add package Reveal.Sdk.AI.AspNetCore
 dotnet build
 ```
 
-### 1d. Optional: Install Client-Side Package
+**Using Visual Studio:**
+
+1. Right-click on your project in Solution Explorer
+2. Select "Manage NuGet Packages"
+3. Select the "Browse" tab
+4. **Check the "Include prerelease" checkbox** (required for preview packages)
+5. Search for `Reveal.Sdk.AI.AspNetCore`
+6. Click "Install"
+
+### 1c. Optional: Install Client-Side Package
 
 If using the JavaScript API:
 
@@ -335,7 +334,8 @@ console.log('Status:', status.status);
 
 ## Success Checklist
 
-- [x] NuGet package `Reveal.Sdk.AI.AspNetCore` installed (v0.1.27-preview)
+- [x] NuGet feed configured with credentials from AI Preview Kickoff meeting
+- [x] NuGet package `Reveal.Sdk.AI.AspNetCore` installed
 - [x] LLM provider configured (OpenAI or Anthropic)
 - [x] `AddRevealAI()` registered in Program.cs
 - [x] Application builds without errors
