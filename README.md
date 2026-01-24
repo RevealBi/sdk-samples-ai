@@ -11,7 +11,7 @@ This guide will walk you through setting up the Reveal AI Add-On in your existin
 ## Prerequisites
 
 - ✅ **Private preview access** granted by your Reveal sales representative
-- ✅ **NuGet feed credentials** (username and password will be provided during the AI Preview Kickoff meeting)
+- ✅ **NuGet feed credentials** (URL, username, and password will be emailed to you)
 - ✅ **Reveal SDK v1.8.3+** installed and working in your ASP.NET Core app
 - ✅ **.NET 8.0 SDK** installed
 - ✅ **LLM Provider account** (OpenAI or Anthropic recommended)
@@ -23,10 +23,10 @@ This guide will walk you through setting up the Reveal AI Add-On in your existin
 
 ### 1a. Add Reveal AI NuGet Feed
 
-Add the Reveal AI NuGet feed to your project. You'll need the username and password provided during your AI Preview Kickoff meeting.
+Add the Reveal AI NuGet feed to your project using the credentials emailed to you.
 
 ```bash
-dotnet nuget add source https://f.feedz.io/reveal/reveal-feed/nuget/index.json \
+dotnet nuget add source YOUR_FEED_URL \
   --name RevealAI \
   --username YOUR_USERNAME \
   --password YOUR_PASSWORD \
@@ -334,7 +334,7 @@ console.log('Status:', status.status);
 
 ## Success Checklist
 
-- [x] NuGet feed configured with credentials from AI Preview Kickoff meeting
+- [x] NuGet feed configured with credentials emailed to you
 - [x] NuGet package `Reveal.Sdk.AI.AspNetCore` installed
 - [x] LLM provider configured (OpenAI or Anthropic)
 - [x] `AddRevealAI()` registered in Program.cs
