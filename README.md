@@ -181,7 +181,7 @@ The AI needs metadata about your datasources. Add to `appsettings.json`:
 ```
 
 **Supported Providers:**
-SqlServer, MySQL, Oracle, Postgres, Snowflake, Athena, AnalysisServices, WebService, Excel and CSV.
+SqlServer, MySQL, Oracle, Postgres, Snowflake, Athena, AnalysisServices, and WebService.
 
 ---
 
