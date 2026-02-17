@@ -123,7 +123,7 @@
 
     <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
     <script src="https://dl.revealbi.io/reveal/libs/1.8.3/infragistics.reveal.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@revealbi/api@0.0.1-preview.1/dist/index.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@revealbi/api/dist/index.umd.js"></script>
 
     <script type="text/javascript">
 
@@ -165,35 +165,32 @@
             return new $.ig.RVMenuItem(label, null, async () => {
                 clearConsole();
                 const streamingEnabled = document.getElementById('streamingToggle').checked;
-                
+
                 const options = {
                     dashboard: dashboard,
-                    insightType: insightType
+                    type: insightType,
                 };
                 if (visualizationId) {
                     options.visualizationId = visualizationId;
                 }
 
                 if (streamingEnabled) {
-                    const result = await client.ai.insights.get(
-                        options,
-                        {
-                            onProgress: (message) => {
-                                console.log(`[Insight Progress]:`, message);
-                                appendToConsole(`*${message}*\n\n`, true);
-                            },
-                            onTextChunk: (text) => {
-                                console.log(`[Insight Text Chunk]:`, text);
-                                appendToConsole(text, true);
-                            },
-                            onComplete: () => {
-                                console.log('Insight generation complete');
-                            }
-                        },
-                        {
-                            streamExplanation: true
-                        }
-                    );
+                    const stream = await client.ai.insights.get({
+                        ...options,
+                        stream: true,
+                    });
+
+                    stream.on('progress', (message) => {
+                        console.log(`[Insight Progress]:`, message);
+                        appendToConsole(`*${message}*\n\n`, true);
+                    });
+
+                    stream.on('text', (text) => {
+                        console.log(`[Insight Text Chunk]:`, text);
+                        appendToConsole(text, true);
+                    });
+
+                    const result = await stream.finalResponse();
                     console.log('AI Insight Result:', result);
                 } else {
                     const result = await client.ai.insights.get(options);
@@ -211,14 +208,14 @@
             revealView.dashboard = dashboard;
             revealView.onMenuOpening = function (visualization, args) {
                 if (args.menuLocation === $.ig.RVMenuLocation.Dashboard) {
-                    args.menuItems.push(createInsightMenuItem("Dashboard Summary", dashboard, rv.InsightType.Summary));
-                    args.menuItems.push(createInsightMenuItem("Dashboard Analysis", dashboard, rv.InsightType.Analysis));
-                    args.menuItems.push(createInsightMenuItem("Dashboard Forecast", dashboard, rv.InsightType.Forecast));
+                    args.menuItems.push(createInsightMenuItem("Dashboard Summary", dashboard, 'summary'));
+                    args.menuItems.push(createInsightMenuItem("Dashboard Analysis", dashboard, 'analysis'));
+                    args.menuItems.push(createInsightMenuItem("Dashboard Forecast", dashboard, 'forecast'));
                 }
                 if (args.menuLocation === $.ig.RVMenuLocation.Visualization) {
-                    args.menuItems.push(createInsightMenuItem("Visualization Summary", dashboard, rv.InsightType.Summary, visualization.id));
-                    args.menuItems.push(createInsightMenuItem("Visualization Analysis", dashboard, rv.InsightType.Analysis, visualization.id));
-                    args.menuItems.push(createInsightMenuItem("Visualization Forecast", dashboard, rv.InsightType.Forecast, visualization.id));
+                    args.menuItems.push(createInsightMenuItem("Visualization Summary", dashboard, 'summary', visualization.id));
+                    args.menuItems.push(createInsightMenuItem("Visualization Analysis", dashboard, 'analysis', visualization.id));
+                    args.menuItems.push(createInsightMenuItem("Visualization Forecast", dashboard, 'forecast', visualization.id));
                 }
             };
         });

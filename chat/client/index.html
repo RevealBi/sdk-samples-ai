@@ -54,7 +54,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
     <script src="https://dl.revealbi.io/reveal/libs/1.8.3/infragistics.reveal.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@revealbi/api@0.0.1-preview.2/dist/index.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@revealbi/api/dist/index.umd.js"></script>
 
     <script type="text/javascript">
         // Configure Reveal SDK
@@ -334,64 +334,57 @@
             let streamingMessageDiv = null;
 
             try {
-                const response = await client.ai.chat.sendMessage(
-                    {
-                        question,
-                        datasourceId: 'SampleExcel',
-                        dashboard: revealView.dashboard,
-                        streamExplanation: true
-                    },
-                    {
-                        onProgress: (message) => {
-                            // Show progress messages as log entries
-                            addChatMessage('log', message);
-                        },
-                        onTextChunk: (chunk) => {
-                            // Handle streaming text chunks (like ChatGPT)
-                            streamedExplanation += chunk;
+                const stream = await client.ai.chat.sendMessage({
+                    message: question,
+                    datasourceId: 'SampleExcel',
+                    dashboard: revealView.dashboard,
+                    stream: true,
+                });
 
-                            // Create or update the streaming message div
-                            if (!streamingMessageDiv) {
-                                streamingMessageDiv = createStreamingMessage();
-                            }
-                            // Update the content with parsed markdown
-                            streamingMessageDiv.innerHTML = marked.parse(streamedExplanation);
-                            chatMessages.scrollTop = chatMessages.scrollHeight;
-                        },
-                        onError: (error, details) => {
-                            console.error('Chat error:', error, details);
-                            addChatMessage('error', error);
-                        },
-                        onComplete: (message, result) => {
-                            console.log('Chat complete:', message);
+                stream.on('progress', (message) => {
+                    // Show progress messages as log entries
+                    addChatMessage('log', message);
+                });
 
-                            // If we received streamed text, mark the streaming div as complete
-                            if (streamingMessageDiv) {
-                                streamingMessageDiv.classList.remove('streaming');
-                                streamingMessageDiv.classList.add('completed');
-                            }
+                stream.on('text', (chunk) => {
+                    // Handle streaming text chunks (like ChatGPT)
+                    streamedExplanation += chunk;
 
-                            // Load dashboard if included in the result
-                            if (result?.dashboard) {
-                                loadDashboardFromResponse(result.dashboard);
-                            }
-                        }
+                    // Create or update the streaming message div
+                    if (!streamingMessageDiv) {
+                        streamingMessageDiv = createStreamingMessage();
                     }
-                );
+                    // Update the content with parsed markdown
+                    streamingMessageDiv.innerHTML = marked.parse(streamedExplanation);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                });
+
+                stream.on('error', (error) => {
+                    console.error('Chat error:', error);
+                    addChatMessage('error', error);
+                });
+
+                const result = await stream.finalResponse();
+
+                // Mark the streaming div as complete
+                if (streamingMessageDiv) {
+                    streamingMessageDiv.classList.remove('streaming');
+                    streamingMessageDiv.classList.add('completed');
+                }
 
                 // Handle case where no streaming occurred (fallback to final response)
-                if (!streamingMessageDiv && response.explanation) {
-                    const htmlContent = marked.parse(response.explanation);
+                if (!streamingMessageDiv && result.explanation) {
+                    const htmlContent = marked.parse(result.explanation);
                     addChatMessage('assistant', htmlContent);
                 }
 
-                if (response.error) {
-                    addChatMessage('error', response.error);
+                if (result.error) {
+                    addChatMessage('error', result.error);
                 }
 
-                // // Load dashboard if present and not already loaded via onComplete
-                if (response.dashboard && !streamingMessageDiv) {
-                    await loadDashboardFromResponse(response.dashboard);
+                // Load dashboard if present
+                if (result.dashboard) {
+                    await loadDashboardFromResponse(result.dashboard);
                 }
             } catch (error) {
                 addChatMessage('error', `Error: ${error.message}`);

@@ -63,7 +63,7 @@ dotnet build
 If using the JavaScript API:
 
 ```bash
-npm install @revealbi/api@0.0.1-preview.2
+npm install @revealbi/api
 ```
 
 See the [@revealbi/api npm package README](https://www.npmjs.com/package/@revealbi/api) for client-side usage.
@@ -253,7 +253,13 @@ If you want to use the JavaScript/TypeScript API for insights and chat in your w
 ### 7a. Install the Client Package
 
 ```bash
-npm install @revealbi/api@latest
+npm install @revealbi/api
+```
+
+Or use the CDN:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@revealbi/api/dist/index.umd.js"></script>
 ```
 
 ### 7b. Initialize the Client
@@ -263,69 +269,92 @@ npm install @revealbi/api@latest
 ```typescript
 import { RevealSdkClient } from '@revealbi/api';
 
-// Initialize the client with your server endpoint
-const client = new RevealSdkClient({
-  serverUrl: 'http://localhost:5000'
-});
-```
-
-### 7c. Generate Dashboards
-
-```typescript
-// Generate a dashboard from natural language
-const result = await client.ai.dashboards.generate({
-  userPrompt: 'Show me total sales by region',
-  datasourceId: 'my-datasource-id'
+// Initialize once at app startup
+RevealSdkClient.initialize({
+  hostUrl: 'http://localhost:5000'
 });
 
-console.log('Dashboard JSON:', result.dashboard);
-console.log('Explanation:', result.explanation);
+const client = RevealSdkClient.getInstance();
 ```
 
-### 7d. Use Chat Interface
+### 7c. Use Chat Interface
 
 ```typescript
-// Send a chat message
-const chatResponse = await client.ai.chat.sendMessage({
-  question: 'What were the top 5 products last quarter?',
+// Non-streaming: send a message and wait for the complete response
+const response = await client.ai.chat.sendMessage({
+  message: 'Show me total sales by region',
   datasourceId: 'my-datasource-id',
-  dashboard: revealView.dashboard //the current dashboard (optional)
 });
 
-console.log('AI Response:', chatResponse.explanation);
-console.log('AI Dashboard:', chatResponse.dashboard);
-```
+console.log('AI Response:', response.explanation);
+if (response.dashboard) {
+  // Load the generated/modified dashboard
+  loadDashboard(response.dashboard);
+}
 
-### 7e. Get Widget Insights
-
-```typescript
-// Analyze an existing widget for insights
-const insights = await client.ai.insights.get({
-  widgetId: 'widget-123',
-  dashboardId: 'dashboard-abc'
+// Streaming: get real-time text chunks
+const stream = await client.ai.chat.sendMessage({
+  message: 'Create a dashboard showing revenue trends',
+  datasourceId: 'my-datasource-id',
+  stream: true,
 });
 
-console.log('Insights:', insights);
-```
+stream.on('progress', (message) => console.log('Status:', message));
+stream.on('text', (content) => appendToUI(content));
+stream.on('error', (error) => console.error(error));
 
-### 7f. List Available Datasources
+const result = await stream.finalResponse();
+if (result.dashboard) {
+  loadDashboard(result.dashboard);
+}
 
-```typescript
-// Get list of datasources
-const datasources = await client.ai.datasources.list();
-
-datasources.forEach(ds => {
-  console.log(`${ds}`);
+// Editing an existing dashboard
+const editResponse = await client.ai.chat.sendMessage({
+  message: 'Add a date filter to this dashboard',
+  datasourceId: 'my-datasource-id',
+  dashboard: revealView.dashboard,
 });
+
+// Reset conversation context
+await client.ai.chat.resetContext();
 ```
 
-### 7g. Check Metadata Status
+### 7d. Get AI Insights
 
 ```typescript
-// Check metadata generation status for a datasource
-const status = await client.ai.metadata.getStatus();
+// Non-streaming: get a summary for a dashboard
+const insight = await client.ai.insights.get({
+  dashboardId: 'my-dashboard',
+  type: 'summary',  // 'summary' | 'analysis' | 'forecast'
+});
 
-console.log('Status:', status.status);
+console.log('Insight:', insight.explanation);
+
+// Streaming: get real-time text chunks
+const stream = await client.ai.insights.get({
+  dashboard: revealView.dashboard,
+  type: 'analysis',
+  stream: true,
+});
+
+stream.on('text', (content) => appendToUI(content));
+
+const result = await stream.finalResponse();
+console.log('Complete:', result.explanation);
+
+// Visualization-level insight
+const vizInsight = await client.ai.insights.get({
+  dashboard: revealView.dashboard,
+  visualizationId: 'sales-chart',
+  type: 'analysis',
+});
+
+// Forecast with custom periods
+const forecast = await client.ai.insights.get({
+  dashboardId: 'my-dashboard',
+  type: 'forecast',
+  forecastPeriods: 12,
+});
 ```
 
 **For complete API documentation and advanced usage**, see the [@revealbi/api npm package README](https://www.npmjs.com/package/@revealbi/api).
