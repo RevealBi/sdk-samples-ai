@@ -10,7 +10,7 @@ builder.Services.AddControllers().AddReveal(builder =>
 });
 
 builder.Services.AddRevealAI()
-    .ConfigureOpenAI(settings =>
+    .AddOpenAI(settings =>
     {
         settings.ApiKey = builder.Configuration["RevealAI:OpenAI:ApiKey"];
         settings.ModelId = "gpt-4.1";

@@ -138,7 +138,8 @@ builder.Services.AddControllers()
     });
 
 // Add Reveal AI services
-builder.Services.AddRevealAI();
+builder.Services.AddRevealAI()
+  .AddOpenAI();
 
 var app = builder.Build();
 
@@ -158,7 +159,6 @@ The AI needs metadata about your datasources. Add to `appsettings.json`:
 ```json
 {
   "RevealAI": {
-    "DefaultClient": "openai",
     "OpenAI": {
       "ApiKey": "OPENAI_API_KEY",
       "ModelId": "gpt-4-turbo"
