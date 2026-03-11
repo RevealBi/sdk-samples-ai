@@ -122,8 +122,8 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
-    <script src="https://dl.revealbi.io/reveal/libs/1.8.3/infragistics.reveal.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@revealbi/api/dist/index.umd.js"></script>
+    <script src="https://dl.revealbi.io/reveal/libs/1.8.4/infragistics.reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@revealbi/api@1.0.5/dist/index.umd.js"></script>
 
     <script type="text/javascript">
 
@@ -184,10 +184,9 @@
                         console.log(`[Insight Progress]:`, message);
                         appendToConsole(`*${message}*\n\n`, true);
                     });
-
-                    stream.on('text', (text) => {
-                        console.log(`[Insight Text Chunk]:`, text);
-                        appendToConsole(text, true);
+                    stream.on('text', (content) => {
+                        console.log(`[Insight Text]:`, content);
+                        appendToConsole(content, true);
                     });
 
                     const result = await stream.finalResponse();
