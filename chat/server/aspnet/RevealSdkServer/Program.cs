@@ -11,8 +11,8 @@ builder.Services.AddRevealAI()
     .AddOpenAI(settings =>
     {
         settings.ApiKey = builder.Configuration["RevealAI:OpenAI:ApiKey"];
-        settings.ModelId = "gpt-4.1";
-    });
+        settings.Model = "gpt-4.1";
+    }).UseMetadataCatalogFile("metadataCatalog.json");
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
