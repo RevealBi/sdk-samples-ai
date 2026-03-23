@@ -1,4 +1,4 @@
-# Getting Started with Reveal AI Add-On (Private Preview)
+# Getting Started with Reveal AI Add-On
 
 This guide will walk you through setting up the Reveal AI Add-On in your existing Reveal SDK application.
 
