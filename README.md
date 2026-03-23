@@ -2,44 +2,20 @@
 
 This guide will walk you through setting up the Reveal AI Add-On in your existing Reveal SDK application.
 
-> **⚠️ PRIVATE PREVIEW**: This is pre-release software for evaluation only. Not intended for production use. Breaking changes expected before RTM.
-
 **Time to Complete**: 30-45 minutes
 
 ---
 
 ## Prerequisites
 
-- ✅ **Private preview access** granted by your Reveal sales representative
-- ✅ **NuGet feed credentials** (URL, username, and password will be emailed to you)
-- ✅ **Reveal SDK v1.8.3+** installed and working in your ASP.NET Core app
+- ✅ **Reveal SDK v1.8.4+** installed and working in your ASP.NET Core app
 - ✅ **.NET 8.0 SDK** installed
 - ✅ **LLM Provider account** (OpenAI or Anthropic recommended)
 - ✅ At least one datasource configured in Reveal SDK
 
 ---
 
-## Step 1: Install NuGet Package
-
-### 1a. Add Reveal AI NuGet Feed
-
-Add the Reveal AI NuGet feed to your project using the credentials emailed to you.
-
-```bash
-dotnet nuget add source YOUR_FEED_URL \
-  --name RevealAI \
-  --username YOUR_USERNAME \
-  --password YOUR_PASSWORD \
-  --store-password-in-clear-text
-```
-
-**Verify:**
-```bash
-dotnet nuget list source
-# Should show: RevealAI [Enabled]
-```
-
-### 1b. Install the Package
+## Step 1a: Install NuGet Package
 
 **Using .NET CLI:**
 
@@ -54,11 +30,10 @@ dotnet build
 1. Right-click on your project in Solution Explorer
 2. Select "Manage NuGet Packages"
 3. Select the "Browse" tab
-4. **Check the "Include prerelease" checkbox** (required for preview packages)
-5. Search for `Reveal.Sdk.AI.AspNetCore`
-6. Click "Install"
+4. Search for `Reveal.Sdk.AI.AspNetCore`
+5. Click "Install"
 
-### 1c. Optional: Install Client-Side Package
+### 1b. Optional: Install Client-Side Package
 
 If using the JavaScript API:
 
@@ -139,7 +114,8 @@ builder.Services.AddControllers()
 
 // Add Reveal AI services
 builder.Services.AddRevealAI()
-  .AddOpenAI();
+  .AddOpenAI()
+  .UseMetadataCatalogFile("config/catalog.json");
 
 var app = builder.Build();
 
@@ -166,22 +142,38 @@ The AI needs metadata about your datasources. Add to `appsettings.json`:
 
     "MetadataService": {
       "GenerateOnStartup": true
-    },
-
-    "MetadataManager": {
-      "Datasources": [
-        {
-          "id": "my-datasource-id",
-          "provider": "SQLServer"
-        }
-      ]
     }
   }
 }
 ```
 
+Then list your configured datasources in your metadata catalog file (e.g. `config/catalog.json`):
+
+json
+```
+{
+  "Datasources":[
+     {
+      "id": "my-datasource-id",
+      "provider": "SQLServer"
+    }
+  ]
+}
+```
+
+
 **Supported Providers:**
-SqlServer, MySQL, Oracle, Postgres, Snowflake, Athena, AnalysisServices, and WebService.
+
+- AmazonAthena
+- MySQL
+- Oracle
+- OracleSID
+- PostgreSQL
+- SSAS
+- SSASHTTP
+- Snowflake
+- SQLServer
+- WebService
 
 ---
 
@@ -210,10 +202,13 @@ Startup metadata initialization completed
 
 ```bash
 # Windows
-dir %USERPROFILE%\.reveal\ai\metadata\
+dir %localappdata%\reveal\ai\metadata\
 
-# Linux/Mac
-ls ~/.reveal/ai/metadata/
+# Linux
+ls ~/.local/share/reveal/ai/metadata/
+
+# Mac
+ls ~/Library/Application Support/reveal/ai/metadata
 ```
 
 You should see files like:
@@ -230,17 +225,15 @@ Test the AI dashboard generation endpoint:
 **Using curl:**
 
 ```bash
-curl -X POST http://localhost:5000/api/reveal/ai/dashboards \
-  -H "Content-Type: application/json" \
-  -d "{\"userPrompt\": \"Show me total sales by region\", \"datasourceId\": \"my-datasource-id\"}"
+curl -X GET http://localhost:5000/api/reveal/ai/metadata/status
 ```
 
-**Expected Response:**
+**Expected Response (once system is ready):**
 
 ```json
 {
-  "dashboard": "{...dashboard JSON...}",
-  "explanation": "I've created a dashboard showing total sales by region..."
+  "status": "Completed",
+  "isInitialized": true
 }
 ```
 
@@ -363,15 +356,13 @@ const forecast = await client.ai.insights.get({
 
 ## Success Checklist
 
-- [x] NuGet feed configured with credentials emailed to you
 - [x] NuGet package `Reveal.Sdk.AI.AspNetCore` installed
 - [x] LLM provider configured (OpenAI or Anthropic)
+- [x] Metadata catalog configured (datasource list)
 - [x] `AddRevealAI()` registered in Program.cs
 - [x] Application builds without errors
-- [x] Metadata files generated in `~/.reveal/ai/metadata/`
-- [x] POST to `/api/reveal/ai/dashboards` returns dashboard JSON
+- [x] Metadata files generated in `reveal/ai/metadata/`
+- [x] POST to `/api/reveal/ai/metadata/status` returns dashboard JSON
 - [x] No errors in console logs
 
 ---
-
-**Questions?** Contact your Reveal sales representative
