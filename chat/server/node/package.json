@@ -1,0 +1,15 @@
+{
+  "name": "reveal-ai-chat-node-server",
+  "version": "1.0.0",
+  "description": "Reveal AI Chat sample - Node.js server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "reveal-sdk-node": "^2.0.0",
+    "reveal-sdk-node-ai": "^0.1.0"
+  }
+}
