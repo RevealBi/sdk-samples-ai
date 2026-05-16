@@ -10,10 +10,9 @@ const os = require('os');
 // Replace with your own API key or load from an environment variable.
 // ---------------------------------------------------------------------------
 const aiSettings = {
-    DefaultClient: 'openai',
-    OpenAI: {
+    openai: {
         ApiKey: process.env.OPENAI_API_KEY || 'YOUR_OPENAI_API_KEY',
-        ModelId: 'gpt-4.1'
+        Model: 'gpt-4.1'
     }
 };
 
@@ -24,10 +23,19 @@ const revealOptions = {
     localFileStoragePath: path.resolve(__dirname, 'Data'),
     plugins: [
         revealAI.withOptions({
+            defaultProvider: 'openai',
             settings: aiSettings,
             metadataCatalogFile: path.resolve(__dirname, 'Reveal', 'Metadata', 'catalog.json'),
             metadataManager: {
                 outputPath: path.resolve(os.homedir(), 'AImetadata'),
+            },
+            callbacks: {
+                contextManagerProvider: async (userContext, message) => {
+                    return '';
+                },
+                aiProvider: async (userContext, message) => {
+                    return '';
+                }
             }
         })
     ]
