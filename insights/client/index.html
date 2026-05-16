@@ -128,11 +128,11 @@
     <script type="text/javascript">
 
         //set this to your server url
-        $.ig.RevealSdkSettings.setBaseUrl("https://localhost:5111/");
+        $.ig.RevealSdkSettings.setBaseUrl("http://localhost:5111/");
 
         // Initialize once at app startup (e.g., in main.ts or App.tsx)
         rv.RevealSdkClient.initialize({
-            hostUrl: 'https://localhost:5111/'
+            hostUrl: 'http://localhost:5111/'
         });
 
         const client = rv.RevealSdkClient.getInstance();
