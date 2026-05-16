@@ -257,16 +257,15 @@ npm install @revealbi/api
 
 ### Step 2: Configure LLM Provider
 
-Pass your LLM provider settings via the `settings` option when registering the plugin (see Step 3). The settings object mirrors the `RevealAI` section of the C# `appsettings.json`:
+Pass your LLM provider settings via the `settings` option when registering the plugin (see Step 3). The settings object uses lowercase provider keys:
 
 #### Option A: OpenAI (Recommended)
 
 ```json
 {
-  "DefaultClient": "openai",
-  "OpenAI": {
+  "openai": {
     "ApiKey": "sk-your-api-key-here",
-    "ModelId": "gpt-4.1"
+    "Model": "gpt-4.1"
   }
 }
 ```
@@ -275,10 +274,9 @@ Pass your LLM provider settings via the `settings` option when registering the p
 
 ```json
 {
-  "DefaultClient": "anthropic",
-  "Anthropic": {
+  "anthropic": {
     "ApiKey": "sk-ant-your-api-key-here",
-    "ModelId": "claude-sonnet-4-5"
+    "Model": "claude-sonnet-4-5"
   }
 }
 ```
@@ -289,7 +287,7 @@ Pass your LLM provider settings via the `settings` option when registering the p
 
 ### Step 3: Register the Plugin
 
-Add the AI plugin to your `RevealOptions`, passing the settings object:
+Add the AI plugin to your `RevealOptions`, passing the settings object and a `defaultProvider`:
 
 ```javascript
 const reveal = require('reveal-sdk-node');
@@ -299,22 +297,26 @@ const os = require('os');
 
 // Load your AI provider settings from your preferred config source
 const aiSettings = {
-  DefaultClient: 'openai',
-  OpenAI: { ApiKey: process.env.OPENAI_API_KEY, ModelId: 'gpt-4.1' }
+  openai: { ApiKey: process.env.OPENAI_API_KEY, Model: 'gpt-4.1' }
 };
 
 const revealOptions = {
   // ... your existing Reveal options
   plugins: [
     revealAI.withOptions({
+      defaultProvider: 'openai',
       settings: aiSettings,
-      metadataCatalogFile: path.resolve(__dirname, 'metadataCatalog.json'),
+      metadataCatalogFile: path.resolve(__dirname, 'Reveal', 'Metadata', 'catalog.json'),
       metadataManager: {
         outputPath: path.resolve(os.homedir(), 'AImetadata'),
       },
-      contextManager: {
-        path: __dirname,
-        fileName: 'context.json'
+      callbacks: {
+        contextManagerProvider: async (userContext, message) => {
+          return '';
+        },
+        aiProvider: async (userContext, message) => {
+          return '';
+        }
       }
     })
   ]
@@ -325,14 +327,14 @@ const revealOptions = {
 
 ### Step 4: Configure Metadata
 
-Create a `metadataCatalog.json` file listing your datasources (same format as C#):
+Create a metadata catalog JSON file listing your datasources (same format as C#):
 
 ```json
 {
   "Datasources": [
     {
-      "id": "my-datasource-id",
-      "provider": "SQLServer"
+      "Id": "my-datasource-id",
+      "Provider": "SQLServer"
     }
   ]
 }
@@ -351,7 +353,7 @@ node server.js
 Once running, verify the AI endpoint:
 
 ```bash
-curl -X GET http://localhost:5000/api/reveal/ai/metadata/status
+curl -X GET http://localhost:5111/api/reveal/ai/metadata/status
 ```
 
 **Expected Response:**
@@ -377,14 +379,23 @@ curl -X GET http://localhost:5000/api/reveal/ai/metadata/status
 
 ### Step 1: Add Maven Dependency
 
-Add to your `pom.xml`:
+Add the Reveal Maven repository and dependency to your `pom.xml`:
 
 ```xml
-<dependency>
-  <groupId>io.revealbi</groupId>
-  <artifactId>reveal-sdk-ai</artifactId>
-  <version>0.1.0</version>
-</dependency>
+<repositories>
+  <repository>
+    <id>reveal.snapshots</id>
+    <url>https://maven.revealbi.io/repository/snapshots</url>
+  </repository>
+</repositories>
+
+<dependencies>
+  <dependency>
+    <groupId>io.revealbi</groupId>
+    <artifactId>reveal-sdk-ai</artifactId>
+    <version>1.0.6-SNAPSHOT</version>
+  </dependency>
+</dependencies>
 ```
 
 Then run:
@@ -397,16 +408,15 @@ mvn install
 
 ### Step 2: Configure LLM Provider
 
-Pass your LLM provider settings via the `additionalOptions` map when creating `RevealAIPluginOptions` (see Step 3). The settings map mirrors the `RevealAI` section of the C# `appsettings.json`:
+Pass your LLM provider settings via the `additionalOptions` map when creating `RevealAIPluginOptions` (see Step 3). The settings map uses lowercase provider keys:
 
 #### Option A: OpenAI (Recommended)
 
 ```json
 {
-  "DefaultClient": "openai",
-  "OpenAI": {
+  "openai": {
     "ApiKey": "sk-your-api-key-here",
-    "ModelId": "gpt-4.1"
+    "Model": "gpt-4.1"
   }
 }
 ```
@@ -415,10 +425,9 @@ Pass your LLM provider settings via the `additionalOptions` map when creating `R
 
 ```json
 {
-  "DefaultClient": "anthropic",
-  "Anthropic": {
+  "anthropic": {
     "ApiKey": "sk-ant-your-api-key-here",
-    "ModelId": "claude-sonnet-4-5"
+    "Model": "claude-sonnet-4-5"
   }
 }
 ```
@@ -429,35 +438,51 @@ Pass your LLM provider settings via the `additionalOptions` map when creating `R
 
 ### Step 3: Register the Plugin
 
-Add the AI plugin when building your `RevealServer`, passing your settings via `additionalOptions`:
+Add the AI plugin when building your `RevealServer`. The `RevealAIPluginOptions` constructor takes:
+1. `defaultProvider` – the provider name (e.g. `"openai"` or `"anthropic"`)
+2. `metadataCatalogFile` – path to your catalog JSON
+3. `MetadataManagerOptions` – output directory for generated metadata
+4. `ContextManagerOptions` – (nullable) context manager config
+5. `additionalOptions` – map containing `"settings"` with your provider config
+
+The plugin also accepts an optional `callbacks` map as a second argument to `withOptions()`:
 
 ```java
 import io.revealbi.ai.RevealAIPlugin;
 import io.revealbi.ai.RevealAIPluginOptions;
+import io.revealbi.core.IRevealServer;
+import io.revealbi.core.RevealPluginCallback;
 import io.revealbi.core.RevealServerBuilder;
 
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 // Load your AI provider settings from your preferred config source
 Map<String, Object> aiSettings = Map.of(
-    "DefaultClient", "openai",
-    "OpenAI", Map.of("ApiKey", System.getenv("OPENAI_API_KEY"), "ModelId", "gpt-4.1")
+    "openai", Map.of("ApiKey", System.getenv("OPENAI_API_KEY"), "Model", "gpt-4.1")
 );
 
 RevealAIPluginOptions aiPluginOptions = new RevealAIPluginOptions(
-    Path.of("config/metadataCatalog.json").toAbsolutePath().normalize().toString(),
+    "openai",
+    Path.of("src", "main", "resources", "Reveal", "Metadata", "catalog.json")
+        .toAbsolutePath().normalize().toString(),
     new RevealAIPluginOptions.MetadataManagerOptions(
         Path.of(System.getProperty("user.home"), "AImetadata").toString()),
-    new RevealAIPluginOptions.ContextManagerOptions(
-        Path.of("config").toAbsolutePath().normalize().toString(),
-        "context.json"),
+    null,
     Map.of("settings", aiSettings));
 
+// Optional callbacks
+Map<String, RevealPluginCallback> callbacks = Map.of(
+    "contextManagerProvider", (userContext, message) ->
+        CompletableFuture.completedFuture(""),
+    "aiProvider", (userContext, message) ->
+        CompletableFuture.completedFuture("")
+);
+
 IRevealServer revealServer = new RevealServerBuilder()
-    .setAuthenticationProvider(authenticationProvider)
     .setDataSourceProvider(dataSourceProvider)
-    .addPlugin(RevealAIPlugin.withOptions(aiPluginOptions))
+    .addPlugin(RevealAIPlugin.withOptions(aiPluginOptions, callbacks))
     .build();
 ```
 
@@ -465,14 +490,14 @@ IRevealServer revealServer = new RevealServerBuilder()
 
 ### Step 4: Configure Metadata
 
-Create a `metadataCatalog.json` file listing your datasources (same format as C#):
+Create a metadata catalog JSON file listing your datasources (same format as C#):
 
 ```json
 {
   "Datasources": [
     {
-      "id": "my-datasource-id",
-      "provider": "SQLServer"
+      "Id": "my-datasource-id",
+      "Provider": "SQLServer"
     }
   ]
 }
@@ -491,7 +516,7 @@ mvn spring-boot:run
 Once running, verify the AI endpoint:
 
 ```bash
-curl -X GET http://localhost:8080/api/reveal/ai/metadata/status
+curl -X GET http://localhost:5111/api/reveal/ai/metadata/status
 ```
 
 **Expected Response:**
@@ -633,18 +658,20 @@ const forecast = await client.ai.insights.get({
 ### Node.js
 
 - [ ] `reveal-sdk-node-ai` npm package installed
-- [ ] LLM provider settings passed via `settings` option in `withOptions()`
-- [ ] `metadataCatalog.json` configured with datasource list
+- [ ] LLM provider settings passed via `settings` option in `withOptions()` (lowercase provider keys)
+- [ ] `defaultProvider` set in `withOptions()` (e.g. `'openai'` or `'anthropic'`)
+- [ ] Metadata catalog JSON file configured with datasource list
 - [ ] `revealAI.withOptions(...)` added to `RevealOptions.plugins`
 - [ ] Application starts without errors
 - [ ] `GET /api/reveal/ai/metadata/status` returns `isInitialized: true`
 
 ### Java
 
-- [ ] `io.revealbi:reveal-sdk-ai` Maven dependency added
-- [ ] LLM provider settings passed via `additionalOptions` in `RevealAIPluginOptions`
-- [ ] `metadataCatalog.json` configured with datasource list
-- [ ] `RevealAIPlugin.withOptions(...)` added via `RevealServerBuilder.addPlugin()`
+- [ ] `io.revealbi:reveal-sdk-ai` Maven dependency added (with Reveal Maven repositories)
+- [ ] LLM provider settings passed via `additionalOptions` in `RevealAIPluginOptions` (lowercase provider keys)
+- [ ] `defaultProvider` set as first argument to `RevealAIPluginOptions` constructor
+- [ ] Metadata catalog JSON file configured with datasource list
+- [ ] `RevealAIPlugin.withOptions(aiPluginOptions, callbacks)` added via `RevealServerBuilder.addPlugin()`
 - [ ] Application builds and starts without errors
 - [ ] `GET /api/reveal/ai/metadata/status` returns `isInitialized: true`
 
