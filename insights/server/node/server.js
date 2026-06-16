@@ -48,7 +48,7 @@ const app = express();
 app.use(cors());
 app.use('/', reveal(revealOptions));
 
-const PORT = parseInt(process.env.PORT || '5111', 10);
+const PORT = parseInt(process.env.PORT || '5113', 10);
 app.listen(PORT, () => {
     console.log(`Reveal AI Insights sample (Node) running on http://localhost:${PORT}`);
 });

@@ -10,7 +10,7 @@ This guide will walk you through setting up the Reveal AI Add-On in your existin
 
 | Platform | Package | Minimum Reveal Version |
 |---|---|---|
-| [ASP.NET Core (C#)](#aspnet-core-c) | `Reveal.Sdk.AI.AspNetCore` (NuGet) | 1.8.4+ |
+| [ASP.NET Core (C#)](#aspnet-core-c) | `Reveal.Sdk.AI.AspNetCore` (NuGet) | 2.0.0+ |
 | [Node.js](#nodejs) | `reveal-sdk-node-ai` (npm) | 2.0.0+ |
 | [Java](#java) | `io.revealbi:reveal-sdk-ai` (Maven) | 2.0.0+ |
 
@@ -20,7 +20,7 @@ This guide will walk you through setting up the Reveal AI Add-On in your existin
 
 ### Prerequisites
 
-- ✅ **Reveal SDK v1.8.4+** installed and working in your ASP.NET Core app
+- ✅ **Reveal SDK v2.0.0+** installed and working in your ASP.NET Core app
 - ✅ **.NET 8.0 SDK** installed
 - ✅ **LLM Provider account** (OpenAI or Anthropic recommended)
 - ✅ At least one datasource configured in Reveal SDK
@@ -393,7 +393,7 @@ Add the Reveal Maven repository and dependency to your `pom.xml`:
   <dependency>
     <groupId>io.revealbi</groupId>
     <artifactId>reveal-sdk-ai</artifactId>
-    <version>1.0.6-SNAPSHOT</version>
+    <version>1.0.7-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
