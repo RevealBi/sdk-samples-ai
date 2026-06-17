@@ -139,7 +139,7 @@ Choose **OpenAI** (recommended for quick setup) or **Anthropic Claude**.
     "DefaultClient": "openai",
     "OpenAI": {
       "ApiKey": "sk-your-api-key-here",
-      "ModelId": "gpt-4.1"
+      "Model": "gpt-4.1"
     }
   }
 }
@@ -159,7 +159,7 @@ Choose **OpenAI** (recommended for quick setup) or **Anthropic Claude**.
     "DefaultClient": "anthropic",
     "Anthropic": {
       "ApiKey": "sk-ant-your-api-key-here",
-      "ModelId": "claude-sonnet-4-5"
+      "Model": "claude-sonnet-4-5"
     }
   }
 }
