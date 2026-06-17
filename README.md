@@ -55,7 +55,73 @@ See the [@revealbi/api npm package README](https://www.npmjs.com/package/@reveal
 
 ---
 
-### Step 2: Configure LLM Provider
+### Step 2: Configure Metadata Generation
+
+The AI needs metadata about your datasources. Add to `appsettings.json`:
+
+```json
+{
+  "RevealAI": {
+    "MetadataService": {
+      "GenerateOnStartup": true
+    }
+  }
+}
+```
+
+Then list your configured datasources in your metadata catalog file (e.g. `config/catalog.json`):
+
+```json
+{
+  "Datasources": [
+    {
+      "id": "my-datasource-id",
+      "provider": "SQLServer"
+    }
+  ]
+}
+```
+
+**Supported Providers:** AmazonAthena, MySQL, Oracle, OracleSID, PostgreSQL, SSAS, SSASHTTP, Snowflake, SQLServer, WebService
+
+---
+
+### Step 3: Register AI Services
+
+Update your `Program.cs`:
+
+```csharp
+using Reveal.Sdk.AI;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Your existing Reveal SDK setup
+builder.Services.AddControllers()
+    .AddReveal(revealBuilder =>
+    {
+        revealBuilder
+            .AddAuthenticationProvider<AuthenticationProvider>()
+            .AddDataSourceProvider<DataSourceProvider>()
+            .AddUserContextProvider<UserContextProvider>();
+    });
+
+// Add Reveal AI services
+builder.Services.AddRevealAI()
+  .AddOpenAI()
+  .UseMetadataCatalogFile("config/catalog.json");
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
+```
+
+---
+
+### Step 4: Configure LLM Provider
 
 Choose **OpenAI** (recommended for quick setup) or **Anthropic Claude**.
 
@@ -100,77 +166,6 @@ Choose **OpenAI** (recommended for quick setup) or **Anthropic Claude**.
 ```
 
 **Tip**: Store your API key in [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets) rather than committing it to source control.
-
----
-
-### Step 3: Register AI Services
-
-Update your `Program.cs`:
-
-```csharp
-using Reveal.Sdk.AI;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Your existing Reveal SDK setup
-builder.Services.AddControllers()
-    .AddReveal(revealBuilder =>
-    {
-        revealBuilder
-            .AddAuthenticationProvider<AuthenticationProvider>()
-            .AddDataSourceProvider<DataSourceProvider>()
-            .AddUserContextProvider<UserContextProvider>();
-    });
-
-// Add Reveal AI services
-builder.Services.AddRevealAI()
-  .AddOpenAI()
-  .UseMetadataCatalogFile("config/catalog.json");
-
-var app = builder.Build();
-
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapControllers();
-
-app.Run();
-```
-
----
-
-### Step 4: Configure Metadata Generation
-
-The AI needs metadata about your datasources. Add to `appsettings.json`:
-
-```json
-{
-  "RevealAI": {
-    "OpenAI": {
-      "ApiKey": "OPENAI_API_KEY",
-      "ModelId": "gpt-4-turbo"
-    },
-
-    "MetadataService": {
-      "GenerateOnStartup": true
-    }
-  }
-}
-```
-
-Then list your configured datasources in your metadata catalog file (e.g. `config/catalog.json`):
-
-```json
-{
-  "Datasources": [
-    {
-      "id": "my-datasource-id",
-      "provider": "SQLServer"
-    }
-  ]
-}
-```
-
-**Supported Providers:** AmazonAthena, MySQL, Oracle, OracleSID, PostgreSQL, SSAS, SSASHTTP, Snowflake, SQLServer, WebService
 
 ---
 
@@ -255,39 +250,28 @@ npm install @revealbi/api
 
 ---
 
-### Step 2: Configure LLM Provider
+### Step 2: Configure Metadata
 
-Pass your LLM provider settings via the `settings` option when registering the plugin (see Step 3). The settings object uses lowercase provider keys:
-
-#### Option A: OpenAI (Recommended)
+Create a metadata catalog JSON file listing your datasources (same format as C#):
 
 ```json
 {
-  "openai": {
-    "ApiKey": "sk-your-api-key-here",
-    "Model": "gpt-4.1"
-  }
+  "Datasources": [
+    {
+      "Id": "my-datasource-id",
+      "Provider": "SQLServer"
+    }
+  ]
 }
 ```
 
-#### Option B: Anthropic Claude
-
-```json
-{
-  "anthropic": {
-    "ApiKey": "sk-ant-your-api-key-here",
-    "Model": "claude-sonnet-4-5"
-  }
-}
-```
-
-**Tip**: Load these settings from a secure source (environment variables, a secrets manager, or a local config file) and pass them at startup.
+**Supported Providers:** AmazonAthena, MySQL, Oracle, OracleSID, PostgreSQL, SSAS, SSASHTTP, Snowflake, SQLServer, WebService
 
 ---
 
 ### Step 3: Register the Plugin
 
-Add the AI plugin to your `RevealOptions`, passing the settings object and a `defaultProvider`:
+Add the AI plugin to your `RevealOptions`, passing the settings object and a `defaultProvider`. The provider settings are described in Step 4.
 
 ```javascript
 const reveal = require('reveal-sdk-node');
@@ -325,22 +309,33 @@ const revealOptions = {
 
 ---
 
-### Step 4: Configure Metadata
+### Step 4: Configure LLM Provider
 
-Create a metadata catalog JSON file listing your datasources (same format as C#):
+Pass your LLM provider settings via the `settings` option when registering the plugin. The settings object uses lowercase provider keys:
+
+#### Option A: OpenAI (Recommended)
 
 ```json
 {
-  "Datasources": [
-    {
-      "Id": "my-datasource-id",
-      "Provider": "SQLServer"
-    }
-  ]
+  "openai": {
+    "ApiKey": "sk-your-api-key-here",
+    "Model": "gpt-4.1"
+  }
 }
 ```
 
-**Supported Providers:** AmazonAthena, MySQL, Oracle, OracleSID, PostgreSQL, SSAS, SSASHTTP, Snowflake, SQLServer, WebService
+#### Option B: Anthropic Claude
+
+```json
+{
+  "anthropic": {
+    "ApiKey": "sk-ant-your-api-key-here",
+    "Model": "claude-sonnet-4-5"
+  }
+}
+```
+
+**Tip**: Load these settings from a secure source (environment variables, a secrets manager, or a local config file) and pass them at startup.
 
 ---
 
@@ -406,33 +401,22 @@ mvn install
 
 ---
 
-### Step 2: Configure LLM Provider
+### Step 2: Configure Metadata
 
-Pass your LLM provider settings via the `additionalOptions` map when creating `RevealAIPluginOptions` (see Step 3). The settings map uses lowercase provider keys:
-
-#### Option A: OpenAI (Recommended)
+Create a metadata catalog JSON file listing your datasources (same format as C#):
 
 ```json
 {
-  "openai": {
-    "ApiKey": "sk-your-api-key-here",
-    "Model": "gpt-4.1"
-  }
+  "Datasources": [
+    {
+      "Id": "my-datasource-id",
+      "Provider": "SQLServer"
+    }
+  ]
 }
 ```
 
-#### Option B: Anthropic Claude
-
-```json
-{
-  "anthropic": {
-    "ApiKey": "sk-ant-your-api-key-here",
-    "Model": "claude-sonnet-4-5"
-  }
-}
-```
-
-**Tip**: Load these settings from a secure source (environment variables, a secrets manager, or a local config file) and pass them at startup.
+**Supported Providers:** AmazonAthena, MySQL, Oracle, OracleSID, PostgreSQL, SSAS, SSASHTTP, Snowflake, SQLServer, WebService
 
 ---
 
@@ -443,7 +427,7 @@ Add the AI plugin when building your `RevealServer`. The `RevealAIPluginOptions`
 2. `metadataCatalogFile` – path to your catalog JSON
 3. `MetadataManagerOptions` – output directory for generated metadata
 4. `ContextManagerOptions` – (nullable) context manager config
-5. `additionalOptions` – map containing `"settings"` with your provider config
+5. `additionalOptions` – map containing `"settings"` with your provider config, described in Step 4
 
 The plugin also accepts an optional `callbacks` map as a second argument to `withOptions()`:
 
@@ -488,22 +472,33 @@ IRevealServer revealServer = new RevealServerBuilder()
 
 ---
 
-### Step 4: Configure Metadata
+### Step 4: Configure LLM Provider
 
-Create a metadata catalog JSON file listing your datasources (same format as C#):
+Pass your LLM provider settings via the `additionalOptions` map when creating `RevealAIPluginOptions`. The settings map uses lowercase provider keys:
+
+#### Option A: OpenAI (Recommended)
 
 ```json
 {
-  "Datasources": [
-    {
-      "Id": "my-datasource-id",
-      "Provider": "SQLServer"
-    }
-  ]
+  "openai": {
+    "ApiKey": "sk-your-api-key-here",
+    "Model": "gpt-4.1"
+  }
 }
 ```
 
-**Supported Providers:** AmazonAthena, MySQL, Oracle, OracleSID, PostgreSQL, SSAS, SSASHTTP, Snowflake, SQLServer, WebService
+#### Option B: Anthropic Claude
+
+```json
+{
+  "anthropic": {
+    "ApiKey": "sk-ant-your-api-key-here",
+    "Model": "claude-sonnet-4-5"
+  }
+}
+```
+
+**Tip**: Load these settings from a secure source (environment variables, a secrets manager, or a local config file) and pass them at startup.
 
 ---
 
@@ -648,9 +643,9 @@ const forecast = await client.ai.insights.get({
 ### ASP.NET Core (C#)
 
 - [ ] NuGet package `Reveal.Sdk.AI.AspNetCore` installed
-- [ ] LLM provider configured in `appsettings.json` (OpenAI or Anthropic)
 - [ ] Metadata catalog configured (datasource list)
 - [ ] `AddRevealAI()` registered in `Program.cs`
+- [ ] LLM provider configured in `appsettings.json` (OpenAI or Anthropic)
 - [ ] Application builds without errors
 - [ ] Metadata files generated in `reveal/ai/metadata/`
 - [ ] `GET /api/reveal/ai/metadata/status` returns `isInitialized: true`
@@ -658,20 +653,20 @@ const forecast = await client.ai.insights.get({
 ### Node.js
 
 - [ ] `reveal-sdk-node-ai` npm package installed
-- [ ] LLM provider settings passed via `settings` option in `withOptions()` (lowercase provider keys)
-- [ ] `defaultProvider` set in `withOptions()` (e.g. `'openai'` or `'anthropic'`)
 - [ ] Metadata catalog JSON file configured with datasource list
 - [ ] `revealAI.withOptions(...)` added to `RevealOptions.plugins`
+- [ ] LLM provider settings passed via `settings` option in `withOptions()` (lowercase provider keys)
+- [ ] `defaultProvider` set in `withOptions()` (e.g. `'openai'` or `'anthropic'`)
 - [ ] Application starts without errors
 - [ ] `GET /api/reveal/ai/metadata/status` returns `isInitialized: true`
 
 ### Java
 
 - [ ] `io.revealbi:reveal-sdk-ai` Maven dependency added (with Reveal Maven repositories)
-- [ ] LLM provider settings passed via `additionalOptions` in `RevealAIPluginOptions` (lowercase provider keys)
-- [ ] `defaultProvider` set as first argument to `RevealAIPluginOptions` constructor
 - [ ] Metadata catalog JSON file configured with datasource list
 - [ ] `RevealAIPlugin.withOptions(aiPluginOptions, callbacks)` added via `RevealServerBuilder.addPlugin()`
+- [ ] LLM provider settings passed via `additionalOptions` in `RevealAIPluginOptions` (lowercase provider keys)
+- [ ] `defaultProvider` set as first argument to `RevealAIPluginOptions` constructor
 - [ ] Application builds and starts without errors
 - [ ] `GET /api/reveal/ai/metadata/status` returns `isInitialized: true`
 
