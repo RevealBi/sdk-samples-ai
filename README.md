@@ -55,38 +55,7 @@ See the [@revealbi/api npm package README](https://www.npmjs.com/package/@reveal
 
 ---
 
-### Step 2: Configure Metadata Generation
-
-The AI needs metadata about your datasources. Add to `appsettings.json`:
-
-```json
-{
-  "RevealAI": {
-    "MetadataService": {
-      "GenerateOnStartup": true
-    }
-  }
-}
-```
-
-Then list your configured datasources in your metadata catalog file (e.g. `config/catalog.json`):
-
-```json
-{
-  "Datasources": [
-    {
-      "id": "my-datasource-id",
-      "provider": "SQLServer"
-    }
-  ]
-}
-```
-
-**Supported Providers:** AmazonAthena, MySQL, Oracle, OracleSID, PostgreSQL, SSAS, SSASHTTP, Snowflake, SQLServer, WebService
-
----
-
-### Step 3: Register AI Services
+### Step 2: Register AI Services
 
 Update your `Program.cs`:
 
@@ -118,6 +87,37 @@ app.MapControllers();
 
 app.Run();
 ```
+
+---
+
+### Step 3: Configure Metadata Generation
+
+The AI needs metadata about your datasources. Add to `appsettings.json`:
+
+```json
+{
+  "RevealAI": {
+    "MetadataService": {
+      "GenerateOnStartup": true
+    }
+  }
+}
+```
+
+Then list your configured datasources in your metadata catalog file (e.g. `config/catalog.json`):
+
+```json
+{
+  "Datasources": [
+    {
+      "id": "my-datasource-id",
+      "provider": "SQLServer"
+    }
+  ]
+}
+```
+
+**Supported Providers:** AmazonAthena, MySQL, Oracle, OracleSID, PostgreSQL, SSAS, SSASHTTP, Snowflake, SQLServer, WebService
 
 ---
 
@@ -250,28 +250,9 @@ npm install @revealbi/api
 
 ---
 
-### Step 2: Configure Metadata
+### Step 2: Register the Plugin
 
-Create a metadata catalog JSON file listing your datasources (same format as C#):
-
-```json
-{
-  "Datasources": [
-    {
-      "Id": "my-datasource-id",
-      "Provider": "SQLServer"
-    }
-  ]
-}
-```
-
-**Supported Providers:** AmazonAthena, MySQL, Oracle, OracleSID, PostgreSQL, SSAS, SSASHTTP, Snowflake, SQLServer, WebService
-
----
-
-### Step 3: Register the Plugin
-
-Add the AI plugin to your `RevealOptions`, passing the settings object and a `defaultProvider`. The provider settings are described in Step 4.
+Add the AI plugin to your `RevealOptions`, passing the settings object and a `defaultProvider`. The metadata catalog referenced here is configured in Step 3, and provider settings are described in Step 4.
 
 ```javascript
 const reveal = require('reveal-sdk-node');
@@ -306,6 +287,25 @@ const revealOptions = {
   ]
 };
 ```
+
+---
+
+### Step 3: Configure Metadata
+
+Create a metadata catalog JSON file listing your datasources (same format as C#):
+
+```json
+{
+  "Datasources": [
+    {
+      "Id": "my-datasource-id",
+      "Provider": "SQLServer"
+    }
+  ]
+}
+```
+
+**Supported Providers:** AmazonAthena, MySQL, Oracle, OracleSID, PostgreSQL, SSAS, SSASHTTP, Snowflake, SQLServer, WebService
 
 ---
 
@@ -401,30 +401,11 @@ mvn install
 
 ---
 
-### Step 2: Configure Metadata
-
-Create a metadata catalog JSON file listing your datasources (same format as C#):
-
-```json
-{
-  "Datasources": [
-    {
-      "Id": "my-datasource-id",
-      "Provider": "SQLServer"
-    }
-  ]
-}
-```
-
-**Supported Providers:** AmazonAthena, MySQL, Oracle, OracleSID, PostgreSQL, SSAS, SSASHTTP, Snowflake, SQLServer, WebService
-
----
-
-### Step 3: Register the Plugin
+### Step 2: Register the Plugin
 
 Add the AI plugin when building your `RevealServer`. The `RevealAIPluginOptions` constructor takes:
 1. `defaultProvider` – the provider name (e.g. `"openai"` or `"anthropic"`)
-2. `metadataCatalogFile` – path to your catalog JSON
+2. `metadataCatalogFile` – path to your catalog JSON, configured in Step 3
 3. `MetadataManagerOptions` – output directory for generated metadata
 4. `ContextManagerOptions` – (nullable) context manager config
 5. `additionalOptions` – map containing `"settings"` with your provider config, described in Step 4
@@ -469,6 +450,25 @@ IRevealServer revealServer = new RevealServerBuilder()
     .addPlugin(RevealAIPlugin.withOptions(aiPluginOptions, callbacks))
     .build();
 ```
+
+---
+
+### Step 3: Configure Metadata
+
+Create a metadata catalog JSON file listing your datasources (same format as C#):
+
+```json
+{
+  "Datasources": [
+    {
+      "Id": "my-datasource-id",
+      "Provider": "SQLServer"
+    }
+  ]
+}
+```
+
+**Supported Providers:** AmazonAthena, MySQL, Oracle, OracleSID, PostgreSQL, SSAS, SSASHTTP, Snowflake, SQLServer, WebService
 
 ---
 
@@ -643,8 +643,8 @@ const forecast = await client.ai.insights.get({
 ### ASP.NET Core (C#)
 
 - [ ] NuGet package `Reveal.Sdk.AI.AspNetCore` installed
-- [ ] Metadata catalog configured (datasource list)
 - [ ] `AddRevealAI()` registered in `Program.cs`
+- [ ] Metadata catalog configured (datasource list)
 - [ ] LLM provider configured in `appsettings.json` (OpenAI or Anthropic)
 - [ ] Application builds without errors
 - [ ] Metadata files generated in `reveal/ai/metadata/`
@@ -653,8 +653,8 @@ const forecast = await client.ai.insights.get({
 ### Node.js
 
 - [ ] `reveal-sdk-node-ai` npm package installed
-- [ ] Metadata catalog JSON file configured with datasource list
 - [ ] `revealAI.withOptions(...)` added to `RevealOptions.plugins`
+- [ ] Metadata catalog JSON file configured with datasource list
 - [ ] LLM provider settings passed via `settings` option in `withOptions()` (lowercase provider keys)
 - [ ] `defaultProvider` set in `withOptions()` (e.g. `'openai'` or `'anthropic'`)
 - [ ] Application starts without errors
@@ -663,8 +663,8 @@ const forecast = await client.ai.insights.get({
 ### Java
 
 - [ ] `io.revealbi:reveal-sdk-ai` Maven dependency added (with Reveal Maven repositories)
-- [ ] Metadata catalog JSON file configured with datasource list
 - [ ] `RevealAIPlugin.withOptions(aiPluginOptions, callbacks)` added via `RevealServerBuilder.addPlugin()`
+- [ ] Metadata catalog JSON file configured with datasource list
 - [ ] LLM provider settings passed via `additionalOptions` in `RevealAIPluginOptions` (lowercase provider keys)
 - [ ] `defaultProvider` set as first argument to `RevealAIPluginOptions` constructor
 - [ ] Application builds and starts without errors
