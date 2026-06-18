@@ -213,7 +213,7 @@ You should see files like:
 ### Step 6: Test Dashboard Generation (Server-Side)
 
 ```bash
-curl -X GET http://localhost:5000/api/reveal/ai/metadata/status
+curl -X GET http://localhost:5112/api/reveal/ai/metadata/status
 ```
 
 **Expected Response (once system is ready):**
@@ -262,7 +262,7 @@ const os = require('os');
 
 // Load your AI provider settings from your preferred config source
 const aiSettings = {
-  openai: { ApiKey: process.env.OPENAI_API_KEY, Model: 'gpt-4.1' }
+  openai: { apiKey: process.env.OPENAI_API_KEY, model: 'gpt-4.1' }
 };
 
 const revealOptions = {
@@ -318,8 +318,8 @@ Pass your LLM provider settings via the `settings` option when registering the p
 ```json
 {
   "openai": {
-    "ApiKey": "sk-your-api-key-here",
-    "Model": "gpt-4.1"
+    "apiKey": "sk-your-api-key-here",
+    "model": "gpt-4.1"
   }
 }
 ```
@@ -329,8 +329,8 @@ Pass your LLM provider settings via the `settings` option when registering the p
 ```json
 {
   "anthropic": {
-    "ApiKey": "sk-ant-your-api-key-here",
-    "Model": "claude-sonnet-4-5"
+    "apiKey": "sk-ant-your-api-key-here",
+    "model": "claude-sonnet-4-5"
   }
 }
 ```
@@ -348,7 +348,7 @@ node server.js
 Once running, verify the AI endpoint:
 
 ```bash
-curl -X GET http://localhost:5111/api/reveal/ai/metadata/status
+curl -X GET http://localhost:5112/api/reveal/ai/metadata/status
 ```
 
 **Expected Response:**
@@ -388,7 +388,7 @@ Add the Reveal Maven repository and dependency to your `pom.xml`:
   <dependency>
     <groupId>io.revealbi</groupId>
     <artifactId>reveal-sdk-ai</artifactId>
-    <version>1.0.7-SNAPSHOT</version>
+    <version>1.0.8</version>
   </dependency>
 </dependencies>
 ```
@@ -425,7 +425,7 @@ import java.util.concurrent.CompletableFuture;
 
 // Load your AI provider settings from your preferred config source
 Map<String, Object> aiSettings = Map.of(
-    "openai", Map.of("ApiKey", System.getenv("OPENAI_API_KEY"), "Model", "gpt-4.1")
+    "openai", Map.of("apiKey", System.getenv("OPENAI_API_KEY"), "model", "gpt-4.1")
 );
 
 RevealAIPluginOptions aiPluginOptions = new RevealAIPluginOptions(
@@ -481,8 +481,8 @@ Pass your LLM provider settings via the `additionalOptions` map when creating `R
 ```json
 {
   "openai": {
-    "ApiKey": "sk-your-api-key-here",
-    "Model": "gpt-4.1"
+    "apiKey": "sk-your-api-key-here",
+    "model": "gpt-4.1"
   }
 }
 ```
@@ -492,8 +492,8 @@ Pass your LLM provider settings via the `additionalOptions` map when creating `R
 ```json
 {
   "anthropic": {
-    "ApiKey": "sk-ant-your-api-key-here",
-    "Model": "claude-sonnet-4-5"
+    "apiKey": "sk-ant-your-api-key-here",
+    "model": "claude-sonnet-4-5"
   }
 }
 ```
@@ -511,7 +511,7 @@ mvn spring-boot:run
 Once running, verify the AI endpoint:
 
 ```bash
-curl -X GET http://localhost:5111/api/reveal/ai/metadata/status
+curl -X GET http://localhost:5112/api/reveal/ai/metadata/status
 ```
 
 **Expected Response:**
@@ -548,7 +548,7 @@ import { RevealSdkClient } from '@revealbi/api';
 
 // Initialize once at app startup
 RevealSdkClient.initialize({
-  hostUrl: 'http://localhost:5000'
+  hostUrl: 'http://localhost:5112'
 });
 
 const client = RevealSdkClient.getInstance();
