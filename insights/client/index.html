@@ -123,7 +123,7 @@
 
     <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
     <script src="https://dl.revealbi.io/reveal/libs/1.8.4/infragistics.reveal.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@revealbi/api@1.0.5/dist/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@revealbi/api@1.3.0/dist/index.umd.js"></script>
 
     <script type="text/javascript">
 
@@ -191,9 +191,23 @@
 
                     const result = await stream.finalResponse();
                     console.log('AI Insight Result:', result);
+
+                    // Display finishReason and token usage
+                    if (result.finishReason || result.usage) {
+                        let meta = '\n\n---\n';
+                        if (result.finishReason) meta += `**Finish reason:** ${result.finishReason}  \n`;
+                        if (result.usage) meta += `**Tokens:** ${result.usage.inputTokens} in / ${result.usage.outputTokens} out`;
+                        appendToConsole(meta, true);
+                    }
                 } else {
                     const result = await client.ai.insights.get(options);
-                    appendToConsole(result.explanation);
+                    let content = result.explanation;
+                    if (result.finishReason || result.usage) {
+                        content += '\n\n---\n';
+                        if (result.finishReason) content += `**Finish reason:** ${result.finishReason}  \n`;
+                        if (result.usage) content += `**Tokens:** ${result.usage.inputTokens} in / ${result.usage.outputTokens} out`;
+                    }
+                    appendToConsole(content);
                 }
             });
         }
