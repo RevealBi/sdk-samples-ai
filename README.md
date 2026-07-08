@@ -10,9 +10,9 @@ This guide will walk you through setting up the Reveal AI Add-On in your existin
 
 | Platform | Package | Minimum Reveal Version |
 |---|---|---|
-| [ASP.NET Core (C#)](#aspnet-core-c) | `Reveal.Sdk.AI.AspNetCore` (NuGet) | 2.0.0+ |
-| [Node.js](#nodejs) | `reveal-sdk-node-ai` (npm) | 2.0.0+ |
-| [Java](#java) | `io.revealbi:reveal-sdk-ai` (Maven) | 2.0.0+ |
+| [ASP.NET Core (C#)](#aspnet-core-c) | `Reveal.Sdk.AI.AspNetCore` (NuGet) | 2.1.0+ |
+| [Node.js](#nodejs) | `reveal-sdk-node-ai` (npm) | 2.1.0+ |
+| [Java](#java) | `io.revealbi:reveal-sdk-ai` (Maven) | 2.1.0+ |
 
 ---
 
@@ -20,7 +20,7 @@ This guide will walk you through setting up the Reveal AI Add-On in your existin
 
 ### Prerequisites
 
-- ✅ **Reveal SDK v2.0.0+** installed and working in your ASP.NET Core app
+- ✅ **Reveal SDK v2.1.0+** installed and working in your ASP.NET Core app
 - ✅ **.NET 8.0 SDK** installed
 - ✅ **LLM Provider account** (OpenAI or Anthropic recommended)
 - ✅ At least one datasource configured in Reveal SDK
@@ -231,7 +231,7 @@ curl -X GET http://localhost:5112/api/reveal/ai/metadata/status
 
 ### Prerequisites
 
-- ✅ **Reveal 2.0.0+** (`reveal-sdk-node`) installed and working
+- ✅ **Reveal 2.1.0+** (`reveal-sdk-node`) installed and working
 - ✅ **Node.js 16+**
 - ✅ **LLM Provider account** (OpenAI or Anthropic recommended)
 - ✅ At least one datasource configured in Reveal SDK
@@ -366,7 +366,7 @@ curl -X GET http://localhost:5112/api/reveal/ai/metadata/status
 
 ### Prerequisites
 
-- ✅ **Reveal 2.0.0+** (`io.revealbi:reveal-sdk-servlet` or Spring equivalent) installed and working
+- ✅ **Reveal 2.1.0+** (`io.revealbi:reveal-sdk-servlet` or Spring equivalent) installed and working
 - ✅ **Java 17+**
 - ✅ **Maven 3.6+**
 - ✅ **LLM Provider account** (OpenAI or Anthropic recommended)
@@ -388,7 +388,7 @@ Add the Reveal Maven repository and dependency to your `pom.xml`:
   <dependency>
     <groupId>io.revealbi</groupId>
     <artifactId>reveal-sdk-ai</artifactId>
-    <version>1.0.8</version>
+    <version>1.1.0</version>
   </dependency>
 </dependencies>
 ```
