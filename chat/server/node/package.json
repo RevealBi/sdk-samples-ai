@@ -10,6 +10,6 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "reveal-sdk-node": "^2.1.0",
-      "reveal-sdk-node-ai": "^1.1.1"
+    "reveal-sdk-node-ai": "^1.1.2"
   }
 }
