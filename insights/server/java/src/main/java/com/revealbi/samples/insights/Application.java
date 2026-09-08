@@ -3,7 +3,6 @@ package com.revealbi.samples.insights;
 import io.revealbi.ai.RevealAIPlugin;
 import io.revealbi.ai.RevealAIPluginOptions;
 import io.revealbi.core.IRevealServer;
-import io.revealbi.core.RevealPluginCallback;
 import io.revealbi.core.RevealServerBuilder;
 import io.revealbi.servlet.RevealEngineServlet;
 import com.revealbi.samples.insights.reveal.DashboardProvider;
@@ -18,7 +17,6 @@ import org.springframework.context.event.EventListener;
 
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 @SpringBootApplication
 public class Application {
@@ -32,32 +30,23 @@ public class Application {
         String apiKey = System.getenv("OPENAI_API_KEY");
         if (apiKey == null) apiKey = "YOUR_API_KEY_HERE";
 
-        Map<String, Object> aiSettings = Map.of(
-                "openai", Map.of("ApiKey", apiKey, "Model", "gpt-4.1")
-        );
-
-        RevealAIPluginOptions aiPluginOptions = new RevealAIPluginOptions(
-                "openai",
-                Path.of("src", "main", "resources", "Reveal", "Metadata", "catalog.json")
-                        .toAbsolutePath().normalize().toString(),
-                new RevealAIPluginOptions.MetadataManagerOptions(
-                        Path.of(System.getProperty("user.home"), "AImetadata").toString()),
-                null,
-                Map.of("settings", aiSettings));
-
-        // Dummy callbacks to prevent crashes when the plugin invokes them
-        Map<String, RevealPluginCallback> callbacks = Map.of(
-                "contextManagerProvider", (userContext, message) ->
-                        CompletableFuture.completedFuture(""),
-                "aiProvider", (userContext, message) ->
-                        CompletableFuture.completedFuture("")
-        );
+        // Declarative "profiles" configuration: a named provider connection (openai) carries
+        // the credentials; a profile (gpt-4.1) selects the model and is used as the default.
+        RevealAIPluginOptions aiPluginOptions = RevealAIPluginOptions.builder()
+                .defaultProfile("gpt-4.1")
+                .addProvider("openai", Map.of("type", "OpenAI", "apiKey", apiKey))
+                .addProfile("gpt-4.1", Map.of("provider", "openai", "model", "gpt-4.1"))
+                .metadataCatalogFile(Path.of("src", "main", "resources", "Reveal", "Metadata", "catalog.json")
+                        .toAbsolutePath().normalize().toString())
+                .metadataManager(new RevealAIPluginOptions.MetadataManagerOptions(
+                        Path.of(System.getProperty("user.home"), "AImetadata").toString()))
+                .build();
 
         return new RevealServerBuilder()
                 .addSettings(settings -> settings.setLocalFilesStoragePath(
                         Path.of("Data").toAbsolutePath().normalize().toString()))
                 .setDashboardProvider(dashboardProvider)
-                .addPlugin(RevealAIPlugin.withOptions(aiPluginOptions, callbacks))
+                .addPlugin(RevealAIPlugin.withOptions(aiPluginOptions))
                 .build();
     }
 

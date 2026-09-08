@@ -6,13 +6,24 @@ const path = require('path');
 const os = require('os');
 
 // ---------------------------------------------------------------------------
-// AI provider settings
+// AI provider settings (declarative "profiles" shape)
 // Replace with your own API key or load from an environment variable.
+// A named provider connection (openai) carries the credentials; a profile
+// (gpt-4.1) selects the model and is used as the default.
 // ---------------------------------------------------------------------------
-const aiSettings = {
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'YOUR_OPENAI_API_KEY';
+
+const aiProviders = {
     openai: {
-        ApiKey: process.env.OPENAI_API_KEY || 'YOUR_OPENAI_API_KEY',
-        Model: 'gpt-4.1'
+        type: 'OpenAI',
+        apiKey: OPENAI_API_KEY
+    }
+};
+
+const aiProfiles = {
+    'gpt-4.1': {
+        provider: 'openai',
+        model: 'gpt-4.1'
     }
 };
 
@@ -40,19 +51,12 @@ const revealOptions = {
     dataSourceItemProvider: dataSourceItemProvider,
     plugins: [
         revealAI.withOptions({
-            defaultProvider: 'openai',
-            settings: aiSettings,
+            defaultProfile: 'gpt-4.1',
+            providers: aiProviders,
+            profiles: aiProfiles,
             metadataCatalogFile: path.resolve(__dirname, 'Reveal', 'Metadata', 'catalog.json'),
             metadataManager: {
                 outputPath: path.resolve(os.homedir(), 'AImetadata'),
-            },
-            callbacks: {
-                contextManagerProvider: async (userContext, message) => {
-                    return '';
-                },
-                aiProvider: async (userContext, message) => {
-                    return '';
-                }
             }
         })
     ]

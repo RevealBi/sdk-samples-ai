@@ -9,13 +9,18 @@ builder.Services.AddControllers().AddReveal(builder =>
     builder.AddDataSourceProvider<DataSourceProvider>();
 });
 
+// Declarative "profiles" configuration built in code (consistent with the Node and Java
+// samples): a named provider connection (openai) carries the credentials, and a profile
+// (gpt-4.1) selects the model and is set as the default.
 builder.Services.AddRevealAI()
-    .UseMetadataCatalogFile("Reveal/Metadata/catalog.json")
-    .AddOpenAI(settings =>
+    .AddOpenAI(openai => openai.ApiKey = builder.Configuration["RevealAI:OpenAI:ApiKey"])
+    .AddProfile("gpt-4.1", profile =>
     {
-        settings.ApiKey = builder.Configuration["RevealAI:OpenAI:ApiKey"];
-        settings.Model = "gpt-4.1";
-    });
+        profile.Provider = "openai";
+        profile.Model = "gpt-4.1";
+    })
+    .SetDefaultProfile("gpt-4.1")
+    .UseMetadataCatalogFile("Reveal/Metadata/catalog.json");
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
