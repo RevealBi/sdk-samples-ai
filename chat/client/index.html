@@ -333,6 +333,15 @@
             streamedExplanation = '';
             let streamingMessageDiv = null;
 
+            // A failed request is reported by the stream, the final result and the rejected promise;
+            // show only the first so the user sees the error once.
+            let errorShown = false;
+            const showError = (message) => {
+                if (errorShown) return;
+                errorShown = true;
+                addChatMessage('error', message);
+            };
+
             try {
                 const stream = await client.ai.chat.sendMessage({
                     message: question,
@@ -361,7 +370,7 @@
 
                 stream.on('error', (error) => {
                     console.error('Chat error:', error);
-                    addChatMessage('error', error);
+                    showError(error);
                 });
 
                 const result = await stream.finalResponse();
@@ -379,7 +388,7 @@
                 }
 
                 if (result.error) {
-                    addChatMessage('error', result.error);
+                    showError(result.error);
                 }
 
                 // Display finishReason and token usage
@@ -395,7 +404,7 @@
                     await loadDashboardFromResponse(result.dashboard);
                 }
             } catch (error) {
-                addChatMessage('error', `Error: ${error.message}`);
+                showError(`Error: ${error.message}`);
             } finally {
                 // Re-enable send button
                 sendButton.disabled = false;
