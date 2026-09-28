@@ -33,6 +33,7 @@ Each client is a static page: `index.html`, plus `styles.css` where there is one
 
 - Set the brand in `:root` through Ignite UI's palette variables (`--ig-primary-500` and friends), `--ig-size`, `--ig-radius-factor` and `--ig-font-family`. Style individual components through their documented `::part()` hooks and `--ig-<component>-*` tokens. Use the `igniteui-theming` MCP server or the `igniteui-wc-customize-component-theme` skill to find the right tokens.
 - **Never use a global `* { margin: 0; padding: 0 }` reset.** Page styles beat a component's own `:host` styles, so such a reset strips the built-in spacing of every `igc-*` element and of Reveal's own elements. Reset only standard HTML elements.
+- **Slotted content in `igc-button`:** the button forces `font-size: inherit !important` and `display: inline-flex` on its direct children. To style rich button content (a title plus a subtitle, say), wrap it in one span and style the elements inside that.
 - **Shadow DOM:** content you return from an `igc-chat` renderer (`options.renderers.messageContent` and so on) is rendered inside each message's shadow root, where page styles don't apply. Put the styles that content needs in a constructed `CSSStyleSheet` and add it to that root's `adoptedStyleSheets`. Use `adoptRootStyles` only as a last resort. Slotted content (`slot="empty-state"`, `slot="actions"`, `slot="suggestions"`) stays in the light DOM, so page styles do apply to it.
 
 ### Accessibility

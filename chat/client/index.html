@@ -22,8 +22,11 @@
             </igc-avatar>
             <span slot="title" class="chat-title">Reveal AI Chat</span>
             <igc-badge slot="actions" id="tokensBadge" class="tokens-badge" hidden></igc-badge>
+            <igc-icon-button slot="actions" id="historyButton" class="header-icon-btn" variant="flat"
+                collection="app" name="history" aria-label="Chat history" aria-haspopup="dialog"></igc-icon-button>
+            <igc-tooltip anchor="historyButton">Chat history</igc-tooltip>
             <igc-button slot="actions" id="newChatButton" class="header-btn prompt" variant="outlined">
-                <igc-icon slot="prefix" collection="app" name="rotate-ccw"></igc-icon>
+                <igc-icon slot="prefix" collection="app" name="plus"></igc-icon>
                 New chat
             </igc-button>
 
@@ -64,6 +67,16 @@
         </section>
     </igc-splitter>
 
+    <!-- Chat history: an overlay drawer listing earlier conversations (kept in this browser) -->
+    <igc-nav-drawer id="historyDrawer" class="history-drawer" position="start" label="Chat history">
+        <div class="history-header">
+            <h2>Chat history</h2>
+            <igc-icon-button id="closeHistoryButton" variant="flat" collection="app" name="x" aria-label="Close chat history"></igc-icon-button>
+        </div>
+        <igc-list id="historyList" class="history-list"></igc-list>
+        <p class="history-empty" id="historyEmpty">Your conversations will be listed here.</p>
+    </igc-nav-drawer>
+
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -83,9 +96,13 @@
             IgcChatComponent,
             IgcChipComponent,
             IgcExpansionPanelComponent,
+            IgcIconButtonComponent,
             IgcIconComponent,
+            IgcListComponent,
             IgcNavbarComponent,
+            IgcNavDrawerComponent,
             IgcSplitterComponent,
+            IgcTooltipComponent,
         } from 'https://cdn.jsdelivr.net/npm/igniteui-webcomponents@7.4.1/+esm';
 
         defineComponents(
@@ -96,9 +113,13 @@
             IgcChatComponent,
             IgcChipComponent,
             IgcExpansionPanelComponent,
+            IgcIconButtonComponent,
             IgcIconComponent,
+            IgcListComponent,
             IgcNavbarComponent,
+            IgcNavDrawerComponent,
             IgcSplitterComponent,
+            IgcTooltipComponent,
         );
 
         // Icons (Lucide, ISC license) registered in the "app" collection. `fill:none` is inline
@@ -106,7 +127,10 @@
         const icons = {
             'sparkles': '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>',
             'arrow-up': '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
-            'rotate-ccw': '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+            'plus': '<path d="M5 12h14"/><path d="M12 5v14"/>',
+            'history': '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+            'x': '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+            'trash-2': '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/>',
             'chevron-down': '<path d="m6 9 6 6 6-6"/>',
             'layout-dashboard': '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
             'circle-alert': '<circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
@@ -142,6 +166,11 @@
         const tipsToggle = document.getElementById('tipsToggle');
         const tips = document.getElementById('tips');
         const dashboardPlaceholder = document.getElementById('dashboardPlaceholder');
+        const historyButton = document.getElementById('historyButton');
+        const historyDrawer = document.getElementById('historyDrawer');
+        const closeHistoryButton = document.getElementById('closeHistoryButton');
+        const historyList = document.getElementById('historyList');
+        const historyEmpty = document.getElementById('historyEmpty');
 
         // Initial dashboard creation questions (always visible)
         const initialQuestions = [
@@ -481,9 +510,7 @@
                     if (result.finishReason) metaInfo.push(`Finish reason: ${result.finishReason}`);
                     if (result.usage) {
                         metaInfo.push(`Tokens: ${result.usage.inputTokens} in / ${result.usage.outputTokens} out`);
-                        totalTokens += result.usage.inputTokens + result.usage.outputTokens;
-                        tokensBadge.textContent = `${totalTokens.toLocaleString()} tokens`;
-                        tokensBadge.hidden = false;
+                        setTokens(totalTokens + result.usage.inputTokens + result.usage.outputTokens);
                     }
                     turn.meta.textContent = metaInfo.join(' · ');
                     turn.meta.hidden = false;
@@ -491,6 +518,7 @@
 
                 // Load dashboard if present
                 if (result.dashboard) {
+                    conversation.dashboard = result.dashboard;
                     await loadDashboardFromResponse(result.dashboard);
                 }
             } catch (error) {
@@ -504,30 +532,174 @@
                 }
                 setBusy(false);
                 scrollToLatest();
+                saveConversation();
             }
         }
 
-        // Start over: clear the conversation and the AI's server-side context
-        async function startNewChat() {
-            if (busy) return;
+        function setTokens(count) {
+            totalTokens = count;
+            tokensBadge.textContent = `${count.toLocaleString()} tokens`;
+            tokensBadge.hidden = count === 0;
+        }
+
+        // Empty the chat and the dashboard pane
+        function clearChat() {
             chat.messages = [];
             turns.clear();
             chat.draftMessage = { text: '' };
             chatOptions.suggestions = [];
             chat.options = { ...chatOptions };
-            totalTokens = 0;
-            tokensBadge.hidden = true;
-            // Drop the dashboard too, so the next question doesn't build on it
+            setTokens(0);
             if (revealView) {
                 revealView = undefined;
                 document.getElementById('revealView').replaceChildren();
                 dashboardPlaceholder.hidden = false;
             }
+        }
+
+        // The AI keeps the conversation on the server; start it over when the chat on screen changes
+        async function resetServerContext() {
             try {
                 await client.ai.chat.resetContext();
             } catch (error) {
                 console.error('Failed to reset the chat context:', error);
             }
+        }
+
+        // Start over. The current conversation is already saved in the history.
+        async function startNewChat() {
+            if (busy) return;
+            clearChat();
+            conversation = createConversation();
+            renderHistory();
+            await resetServerContext();
+        }
+
+        // ---- Chat history ----
+        // Conversations are kept in this browser's localStorage, newest first. Each one stores its
+        // messages (assistant answers as rendered HTML), its token count and its last dashboard.
+        const HISTORY_KEY = 'reveal-ai-chat.history';
+        const MAX_CONVERSATIONS = 20;
+        let conversations = loadConversations();
+        let conversation = createConversation();
+
+        function loadConversations() {
+            try {
+                return JSON.parse(localStorage.getItem(HISTORY_KEY)) ?? [];
+            } catch {
+                return [];
+            }
+        }
+
+        function storeConversations() {
+            try {
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(conversations));
+            } catch (error) {
+                console.warn('Could not save the chat history:', error);
+            }
+        }
+
+        function createConversation() {
+            return { id: crypto.randomUUID(), title: '', updatedAt: Date.now(), tokens: 0, dashboard: null, messages: [] };
+        }
+
+        // Save the conversation on screen at the top of the history
+        function saveConversation() {
+            if (!chat.messages.length) return;
+            conversation.messages = chat.messages.map((message) => {
+                const turn = turns.get(message.id);
+                if (message.sender !== 'assistant' || !turn) return { sender: message.sender, text: message.text };
+                return { sender: 'assistant', html: turn.text.innerHTML, meta: turn.meta.hidden ? '' : turn.meta.textContent };
+            });
+            conversation.title ||= chat.messages.find(message => message.sender === 'user')?.text ?? 'New chat';
+            conversation.tokens = totalTokens;
+            conversation.updatedAt = Date.now();
+            conversations = [conversation, ...conversations.filter(c => c.id !== conversation.id)].slice(0, MAX_CONVERSATIONS);
+            storeConversations();
+            renderHistory();
+        }
+
+        async function openConversation(id) {
+            if (busy) return;
+            const saved = conversations.find(c => c.id === id);
+            if (!saved) return;
+            historyDrawer.hide();
+            if (saved.id === conversation.id) return;
+
+            clearChat();
+            conversation = saved;
+            for (const message of saved.messages) {
+                if (message.sender !== 'assistant') {
+                    addMessage(message.sender, message.text);
+                    continue;
+                }
+                const turn = turns.get(addMessage('assistant').id);
+                turn.progress.hidden = true;
+                turn.text.innerHTML = message.html;
+                if (message.meta) {
+                    turn.meta.textContent = message.meta;
+                    turn.meta.hidden = false;
+                }
+            }
+            setTokens(saved.tokens);
+            showPersistentSuggestions();
+            renderHistory();
+            if (saved.dashboard) await loadDashboardFromResponse(saved.dashboard);
+            scrollToLatest();
+            // The server only remembers the latest conversation, so follow-ups here build on the dashboard
+            await resetServerContext();
+        }
+
+        function deleteConversation(id) {
+            conversations = conversations.filter(c => c.id !== id);
+            storeConversations();
+            if (id === conversation.id) {
+                startNewChat();
+            } else {
+                renderHistory();
+            }
+        }
+
+        const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+
+        function renderHistory() {
+            historyEmpty.hidden = conversations.length > 0;
+            historyList.replaceChildren(...conversations.map((saved) => {
+                const isCurrent = saved.id === conversation.id;
+                const item = document.createElement('igc-list-item');
+                item.className = 'history-item';
+                item.classList.toggle('active', isCurrent);
+
+                // The row's button opens the conversation; delete is a separate button beside it
+                const open = document.createElement('igc-button');
+                open.className = 'history-open';
+                open.variant = 'flat';
+                if (isCurrent) open.setAttribute('aria-current', 'true');
+                const title = document.createElement('span');
+                title.className = 'history-title';
+                title.textContent = saved.title;
+                const when = document.createElement('span');
+                when.className = 'history-when';
+                when.textContent = dateFormat.format(saved.updatedAt);
+                // Wrapped, because igc-button forces its direct children to inherit its font size
+                const label = document.createElement('span');
+                label.className = 'history-label';
+                label.append(title, when);
+                open.append(label);
+                open.addEventListener('click', () => openConversation(saved.id));
+
+                const remove = document.createElement('igc-icon-button');
+                remove.slot = 'end';
+                remove.className = 'history-delete';
+                remove.variant = 'flat';
+                remove.collection = 'app';
+                remove.name = 'trash-2';
+                remove.setAttribute('aria-label', `Delete "${saved.title}"`);
+                remove.addEventListener('click', () => deleteConversation(saved.id));
+
+                item.append(open, remove);
+                return item;
+            }));
         }
 
         // Event listeners
@@ -538,13 +710,17 @@
                 e.preventDefault();
                 return;
             }
-            handleSendChat(question);
+            // The chat adds the user's message after this event, so answer once it's in the list
+            queueMicrotask(() => handleSendChat(question));
         });
 
         newChatButton.addEventListener('click', startNewChat);
+        historyButton.addEventListener('click', () => historyDrawer.show());
+        closeHistoryButton.addEventListener('click', () => historyDrawer.hide());
 
         initializeSuggestedQuestions();
         initializePersistentSuggestions();
+        renderHistory();
     </script>
 </body>
 
