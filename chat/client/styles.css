@@ -397,15 +397,20 @@ igc-chip.tip:hover::part(base) {
     background: #f8fafc; /* slate-50 */
 }
 
+/* Same height and border as the chat header so the two lines meet. The navbar's theme puts a
+   56px min-height and its own border on the host, so override them there, not on ::part(base). */
 igc-navbar.dashboard-bar {
     --ig-navbar-background: #fff;
     --ig-navbar-text-color: #0f172a;
     --ig-icon-size: 18px;
+    box-sizing: border-box;
+    min-height: 3.25rem;
+    border-bottom: 1px solid var(--border);
 }
 
 igc-navbar.dashboard-bar::part(base) {
-    min-height: 3.25rem;
-    border-bottom: 1px solid var(--border);
+    min-height: 0;
+    height: 100%;
     box-shadow: none;
 }
 
