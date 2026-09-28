@@ -8,9 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Reveal.Sdk.AspNetCore" Version="2.2.1" />
     <PackageReference Include="Reveal.Sdk.AI.AspNetCore" Version="1.5.213" />
     <PackageReference Include="Reveal.Sdk.AI.OpenAI" Version="1.5.213" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
   </ItemGroup>
 
 </Project>
