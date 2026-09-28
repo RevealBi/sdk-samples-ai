@@ -54,7 +54,10 @@
         <!-- Dashboard Panel -->
         <section slot="end" class="dashboard-pane" aria-label="Dashboard">
             <igc-navbar class="dashboard-bar">
-                <igc-icon slot="start" collection="app" name="layout-dashboard" aria-hidden="true"></igc-icon>
+                <!-- In an avatar: igc-navbar styles icons slotted directly into it as clickable actions -->
+                <igc-avatar slot="start" class="brand-avatar" shape="rounded" aria-hidden="true">
+                    <igc-icon collection="app" name="layout-dashboard"></igc-icon>
+                </igc-avatar>
                 <h1>Dashboard</h1>
             </igc-navbar>
             <div class="dashboard-body">

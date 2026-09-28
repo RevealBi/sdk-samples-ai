@@ -400,7 +400,6 @@ igc-chip.tip:hover::part(base) {
 igc-navbar.dashboard-bar {
     --ig-navbar-background: #fff;
     --ig-navbar-text-color: #0f172a;
-    --ig-navbar-idle-icon-color: var(--ig-primary-500);
     --ig-icon-size: 18px;
 }
 
