@@ -5,118 +5,61 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reveal Sdk - Web Component</title>
-
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        .container {
-            display: flex;
-            height: 100vh;
-            gap: 10px;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-
-        #revealView {
-            flex: 1;
-            height: 100%;
-            min-width: 0;
-        }
-
-        .console-panel {
-            flex: 0 0 600px;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: #f9f9f9;
-            overflow: hidden;
-        }
-
-        .console-header {
-            padding: 10px 15px;
-            background: #2c3e50;
-            color: white;
-            font-weight: bold;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .streaming-toggle {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            font-weight: normal;
-        }
-
-        .streaming-toggle input[type="checkbox"] {
-            cursor: pointer;
-        }
-
-        .console-content {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            background: white;
-        }
-
-        .console-content h1,
-        .console-content h2,
-        .console-content h3 {
-            margin-top: 0.5em;
-            margin-bottom: 0.5em;
-        }
-
-        .console-content p {
-            margin: 0.5em 0;
-            line-height: 1.6;
-        }
-
-        .console-content code {
-            background: #f4f4f4;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-        }
-
-        .console-content pre {
-            background: #f4f4f4;
-            padding: 10px;
-            border-radius: 4px;
-            overflow-x: auto;
-        }
-
-        .console-content ul,
-        .console-content ol {
-            margin: 0.5em 0;
-            padding-left: 1.5em;
-        }
-    </style>
-
+    <title>Reveal AI Insights</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/igniteui-webcomponents@7.4.1/themes/light/bootstrap.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <div class="container">
-        <div id="revealView"></div>
-        <div class="console-panel">
-            <div class="console-header">
-                <span>AI Insights Explanation</span>
-                <label class="streaming-toggle">
-                    <input type="checkbox" id="streamingToggle" checked>
-                    <span>Stream</span>
-                </label>
+    <igc-splitter class="app" end-size="38%" start-min-size="360px" end-min-size="320px">
+        <div slot="start" id="revealView"></div>
+
+        <!-- AI Insights Panel -->
+        <section slot="end" class="insights-pane" aria-label="AI insights">
+            <igc-navbar class="insights-bar">
+                <igc-avatar slot="start" class="brand-avatar" shape="rounded" aria-hidden="true">
+                    <igc-icon collection="app" name="sparkles"></igc-icon>
+                </igc-avatar>
+                <h1>AI Insights</h1>
+                <igc-switch slot="end" id="streamingToggle" checked>Stream</igc-switch>
+            </igc-navbar>
+
+            <div class="insights-body" aria-live="polite">
+                <div class="insights-empty" id="insightsEmpty">
+                    <igc-avatar shape="rounded" size="large" aria-hidden="true">
+                        <igc-icon collection="app" name="lightbulb"></igc-icon>
+                    </igc-avatar>
+                    <h2>Ask the AI about this dashboard</h2>
+                    <p>
+                        Open the dashboard menu, or a visualization's menu
+                        (<igc-icon class="inline-icon" collection="app" name="ellipsis-vertical" aria-label="more options"></igc-icon>),
+                        and pick <strong>Summary</strong>, <strong>Analysis</strong> or <strong>Forecast</strong>.
+                    </p>
+                </div>
+
+                <igc-card class="insight-card" id="insightCard" hidden>
+                    <igc-card-header>
+                        <h2 slot="title" id="insightTitle"></h2>
+                        <span slot="subtitle" id="insightSubtitle"></span>
+                    </igc-card-header>
+                    <igc-card-content>
+                        <div class="progress" id="insightProgress" role="status">
+                            <span class="pulse"></span><span id="insightProgressText">Thinking…</span>
+                        </div>
+                        <div class="md" id="consoleOutput"></div>
+                        <div class="error" id="insightError" role="alert" hidden>
+                            <igc-icon collection="app" name="circle-alert" aria-hidden="true"></igc-icon>
+                            <span id="insightErrorText"></span>
+                        </div>
+                        <div class="meta" id="insightMeta" hidden></div>
+                    </igc-card-content>
+                </igc-card>
             </div>
-            <div class="console-content" id="consoleOutput"></div>
-        </div>
-    </div>
+        </section>
+    </igc-splitter>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -125,7 +68,41 @@
     <script src="https://dl.revealbi.io/reveal/libs/1.8.4/infragistics.reveal.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@revealbi/api@1.3.0/dist/index.umd.js"></script>
 
-    <script type="text/javascript">
+    <script type="module">
+        import {
+            defineComponents,
+            registerIconFromText,
+            IgcAvatarComponent,
+            IgcCardComponent,
+            IgcIconComponent,
+            IgcNavbarComponent,
+            IgcSplitterComponent,
+            IgcSwitchComponent,
+        } from 'https://cdn.jsdelivr.net/npm/igniteui-webcomponents@7.4.1/+esm';
+
+        // IgcCardComponent also registers igc-card-header and igc-card-content
+        defineComponents(
+            IgcAvatarComponent,
+            IgcCardComponent,
+            IgcIconComponent,
+            IgcNavbarComponent,
+            IgcSplitterComponent,
+            IgcSwitchComponent,
+        );
+
+        // Icons (Lucide, ISC license) registered in the "app" collection. `fill:none` is inline
+        // because igc-icon's own stylesheet fills SVGs, which beats a presentation attribute.
+        const icons = {
+            'sparkles': '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>',
+            'lightbulb': '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+            'ellipsis-vertical': '<circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>',
+            'circle-alert': '<circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
+        };
+        for (const [name, paths] of Object.entries(icons)) {
+            registerIconFromText(name,
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="fill:none" stroke="currentColor" ' +
+                `stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`, 'app');
+        }
 
         //set this to your server url
         $.ig.RevealSdkSettings.setBaseUrl("http://localhost:5113/");
@@ -138,76 +115,119 @@
         const client = rv.RevealSdkClient.getInstance();
         var revealView;
         let streamingBuffer = '';
+        // Each insight request gets a number; events from an older request are ignored, so picking a
+        // new insight while one is still streaming replaces it cleanly.
+        let currentRequest = 0;
 
-        // Function to append streaming markdown text to console
+        // DOM Elements
+        const streamingToggle = document.getElementById('streamingToggle');
+        const insightsEmpty = document.getElementById('insightsEmpty');
+        const insightCard = document.getElementById('insightCard');
+        const insightTitle = document.getElementById('insightTitle');
+        const insightSubtitle = document.getElementById('insightSubtitle');
+        const insightProgress = document.getElementById('insightProgress');
+        const insightProgressText = document.getElementById('insightProgressText');
+        const consoleOutput = document.getElementById('consoleOutput');
+        const insightError = document.getElementById('insightError');
+        const insightErrorText = document.getElementById('insightErrorText');
+        const insightMeta = document.getElementById('insightMeta');
+
+        // Function to append streaming markdown text to the panel
         function appendToConsole(markdownText, isStreaming = false) {
-            const consoleOutput = document.getElementById('consoleOutput');
             if (isStreaming) {
                 streamingBuffer += markdownText;
-                const htmlContent = marked.parse(streamingBuffer);
-                consoleOutput.innerHTML = htmlContent;
+                consoleOutput.innerHTML = marked.parse(streamingBuffer);
             } else {
-                const htmlContent = marked.parse(markdownText);
-                consoleOutput.innerHTML = htmlContent;
+                consoleOutput.innerHTML = marked.parse(markdownText);
             }
-            // Auto-scroll to bottom
-            consoleOutput.scrollTop = consoleOutput.scrollHeight;
         }
 
-        // Function to clear console
-        function clearConsole() {
-            document.getElementById('consoleOutput').innerHTML = '';
+        // Reset the panel for a new insight
+        function startInsight(label, subtitle) {
+            insightsEmpty.hidden = true;
+            insightCard.hidden = false;
+            insightTitle.textContent = label;
+            insightSubtitle.textContent = subtitle;
+            insightProgressText.textContent = 'Thinking…';
+            insightProgress.hidden = false;
+            consoleOutput.innerHTML = '';
+            insightError.hidden = true;
+            insightMeta.hidden = true;
             streamingBuffer = '';
         }
 
+        function showMeta(result) {
+            // Display finishReason and token usage
+            if (!result.finishReason && !result.usage) return;
+            const meta = [];
+            if (result.finishReason) meta.push(`Finish reason: ${result.finishReason}`);
+            if (result.usage) meta.push(`Tokens: ${result.usage.inputTokens} in / ${result.usage.outputTokens} out`);
+            insightMeta.textContent = meta.join(' · ');
+            insightMeta.hidden = false;
+        }
+
+        function showError(message) {
+            // Show only the first error of a request
+            if (!insightError.hidden) return;
+            insightErrorText.textContent = String(message);
+            insightError.hidden = false;
+        }
+
         // Helper function to create insight menu items
-        function createInsightMenuItem(label, dashboard, insightType, visualizationId = null) {
+        function createInsightMenuItem(label, dashboard, insightType, visualization = null) {
             return new $.ig.RVMenuItem(label, null, async () => {
-                clearConsole();
-                const streamingEnabled = document.getElementById('streamingToggle').checked;
+                const request = ++currentRequest;
+                const isCurrent = () => request === currentRequest;
+                startInsight(label, visualization ? visualization.title : dashboard.title);
+                const streamingEnabled = streamingToggle.checked;
 
                 const options = {
                     dashboard: dashboard,
                     type: insightType,
                 };
-                if (visualizationId) {
-                    options.visualizationId = visualizationId;
+                if (visualization) {
+                    options.visualizationId = visualization.id;
                 }
 
-                if (streamingEnabled) {
-                    const stream = await client.ai.insights.get({
-                        ...options,
-                        stream: true,
-                    });
+                try {
+                    let result;
+                    if (streamingEnabled) {
+                        const stream = await client.ai.insights.get({
+                            ...options,
+                            stream: true,
+                        });
 
-                    stream.on('progress', (message) => {
-                        console.log(`[Insight Progress]:`, message);
-                        appendToConsole(`*${message}*\n\n`, true);
-                    });
-                    stream.on('text', (content) => {
-                        console.log(`[Insight Text]:`, content);
-                        appendToConsole(content, true);
-                    });
+                        stream.on('progress', (message) => {
+                            console.log(`[Insight Progress]:`, message);
+                            if (isCurrent()) insightProgressText.textContent = message;
+                        });
+                        stream.on('text', (content) => {
+                            console.log(`[Insight Text]:`, content);
+                            if (!isCurrent()) return;
+                            insightProgress.hidden = true;
+                            appendToConsole(content, true);
+                        });
+                        stream.on('error', (error) => {
+                            console.error('Insight error:', error);
+                            if (isCurrent()) showError(error);
+                        });
 
-                    const result = await stream.finalResponse();
+                        result = await stream.finalResponse();
+                    } else {
+                        result = await client.ai.insights.get(options);
+                        if (isCurrent() && result.explanation) appendToConsole(result.explanation);
+                    }
                     console.log('AI Insight Result:', result);
+                    if (!isCurrent()) return;
 
-                    // Display finishReason and token usage
-                    if (result.finishReason || result.usage) {
-                        let meta = '\n\n---\n';
-                        if (result.finishReason) meta += `**Finish reason:** ${result.finishReason}  \n`;
-                        if (result.usage) meta += `**Tokens:** ${result.usage.inputTokens} in / ${result.usage.outputTokens} out`;
-                        appendToConsole(meta, true);
-                    }
-                } else {
-                    const result = await client.ai.insights.get(options);
-                    let content = result.explanation;
-                    if (result.finishReason || result.usage) {
-                        content += '\n\n---\n';
-                        if (result.finishReason) content += `**Finish reason:** ${result.finishReason}  \n`;
-                        if (result.usage) content += `**Tokens:** ${result.usage.inputTokens} in / ${result.usage.outputTokens} out`;
-                    }
-                    appendToConsole(content);
+                    // Handle case where no streaming occurred (fallback to final response)
+                    if (!consoleOutput.innerHTML && result.explanation) appendToConsole(result.explanation);
+                    if (result.error) showError(result.error);
+                    showMeta(result);
+                } catch (error) {
+                    if (isCurrent()) showError(`Error: ${error.message}`);
+                } finally {
+                    if (isCurrent()) insightProgress.hidden = true;
                 }
             });
         }
@@ -226,9 +246,9 @@
                     args.menuItems.push(createInsightMenuItem("Dashboard Forecast", dashboard, 'forecast'));
                 }
                 if (args.menuLocation === $.ig.RVMenuLocation.Visualization) {
-                    args.menuItems.push(createInsightMenuItem("Visualization Summary", dashboard, 'summary', visualization.id));
-                    args.menuItems.push(createInsightMenuItem("Visualization Analysis", dashboard, 'analysis', visualization.id));
-                    args.menuItems.push(createInsightMenuItem("Visualization Forecast", dashboard, 'forecast', visualization.id));
+                    args.menuItems.push(createInsightMenuItem("Visualization Summary", dashboard, 'summary', visualization));
+                    args.menuItems.push(createInsightMenuItem("Visualization Analysis", dashboard, 'analysis', visualization));
+                    args.menuItems.push(createInsightMenuItem("Visualization Forecast", dashboard, 'forecast', visualization));
                 }
             };
         });

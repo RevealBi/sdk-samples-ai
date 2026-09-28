@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "igniteui-cli": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "igniteui-cli@latest",
+        "mcp"
+      ]
+    },
+    "igniteui-theming": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "igniteui-theming@latest",
+        "igniteui-theming-mcp"
+      ]
+    }
+  }
+}
