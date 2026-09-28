@@ -81,10 +81,6 @@
     </igc-nav-drawer>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
-    <script src="https://dl.revealbi.io/reveal/libs/1.8.4/infragistics.reveal.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@revealbi/api@1.3.0/dist/index.umd.js"></script>
 
     <script type="module">
@@ -107,6 +103,8 @@
             IgcSplitterComponent,
             IgcTooltipComponent,
         } from 'https://cdn.jsdelivr.net/npm/igniteui-webcomponents@7.4.1/+esm';
+        import { RevealSdkSettings, RevealUtility, RevealView } from 'https://cdn.jsdelivr.net/npm/reveal-sdk@2.2.1/dist/reveal-sdk.esm.js';
+        import { marked } from 'https://cdn.jsdelivr.net/npm/marked@18.0.14/lib/marked.esm.js';
 
         defineComponents(
             IgcAccordionComponent,
@@ -147,7 +145,7 @@
         setIconRef('send_message', 'default', { name: 'arrow-up', collection: 'app' });
 
         // Configure Reveal SDK
-        $.ig.RevealSdkSettings.setBaseUrl("http://localhost:5112/");
+        RevealSdkSettings.setBaseUrl("http://localhost:5112/");
 
         // Initialize Reveal SDK Client
         rv.RevealSdkClient.initialize({
@@ -422,7 +420,7 @@
 
         // Initialize RevealView. Created with the first dashboard, so the placeholder shows until then.
         function initializeDashboard() {
-            revealView = new $.ig.RevealView("#revealView");
+            revealView = new RevealView("#revealView");
             revealView.canEdit = false;
             revealView.canSaveAs = false;
             revealView.showRefresh = false;
@@ -437,7 +435,7 @@
                     dashboardPlaceholder.hidden = true;
                     initializeDashboard();
                 }
-                revealView.dashboard = await $.ig.RevealUtility.createDashboardFromJsonObject(json);
+                revealView.dashboard = await RevealUtility.createDashboardFromJsonObject(json);
             } catch (e) {
                 console.error('Failed to load dashboard:', e);
                 addMessage('error', 'Failed to load dashboard: ' + e.message);
