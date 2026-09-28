@@ -6,48 +6,63 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reveal AI Chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/igniteui-webcomponents@7.4.1/themes/light/bootstrap.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <div class="container">
+    <igc-splitter class="app" start-size="42%" start-min-size="360px" end-min-size="320px">
         <!-- Chat Panel -->
-        <div class="chat-panel">
-            <div class="chat-messages" id="chatMessages">
-                <div class="empty-state">
-                    <div class="empty-state-icon">🚀</div>
-                    <h3>Start a conversation</h3>
-                    <p>Ask questions about your data and I'll help you create insightful dashboards and visualizations.</p>
-                    <div class="suggested-questions" id="suggestedQuestions">
-                        <!-- Suggested questions will be inserted here -->
-                    </div>
-                </div>
+        <igc-chat slot="start" id="chat">
+            <igc-avatar slot="prefix" class="brand-avatar" shape="rounded" aria-hidden="true">
+                <igc-icon collection="app" name="sparkles"></igc-icon>
+            </igc-avatar>
+            <span slot="title" class="chat-title">Reveal AI Chat</span>
+            <igc-badge slot="actions" id="tokensBadge" class="tokens-badge" hidden></igc-badge>
+            <igc-button slot="actions" id="newChatButton" class="header-btn prompt" variant="outlined">
+                <igc-icon slot="prefix" collection="app" name="rotate-ccw"></igc-icon>
+                New chat
+            </igc-button>
+
+            <div slot="empty-state" class="empty-state">
+                <igc-avatar shape="rounded" size="large" aria-hidden="true">
+                    <igc-icon collection="app" name="sparkles"></igc-icon>
+                </igc-avatar>
+                <h2>Start a conversation</h2>
+                <p>Ask questions about your data and I'll create insightful dashboards and visualizations.</p>
+                <div class="prompt-grid" id="starterPrompts"></div>
+                <igc-button id="moreExamplesButton" class="more-toggle" variant="flat" aria-expanded="false" aria-controls="exampleCategories">
+                    More examples
+                    <igc-icon slot="suffix" collection="app" name="chevron-down"></igc-icon>
+                </igc-button>
+                <igc-accordion id="exampleCategories" class="example-categories" single-expand hidden></igc-accordion>
             </div>
-            <div class="suggestions-panel" id="suggestionsPanel">
-                <div class="suggestions-header" id="suggestionsHeader">
-                    <div class="suggestions-title">
-                        <span>💡</span>
-                        <span>Try asking...</span>
-                    </div>
-                    <div class="suggestions-toggle" id="suggestionsToggle">▼</div>
-                </div>
-                <div class="suggestions-content" id="suggestionsContent">
-                    <!-- Quick suggestions will be inserted here -->
-                </div>
-            </div>
-            <div class="chat-input-container">
-                <div class="chat-input-wrapper">
-                    <textarea id="chatInput" class="chat-input" placeholder="Ask me anything about your data..." rows="1"></textarea>
-                    <button id="sendButton" class="send-button">Send</button>
-                </div>
-            </div>
-        </div>
+
+            <igc-button slot="suggestions-header" id="tipsToggle" class="tips-toggle" variant="flat" aria-expanded="true" aria-controls="tips">
+                <igc-icon slot="prefix" collection="app" name="chevron-down"></igc-icon>
+                Try asking
+            </igc-button>
+            <div slot="suggestions" id="tips" class="tips"></div>
+        </igc-chat>
 
         <!-- Dashboard Panel -->
-        <div class="dashboard-panel">
-            <div id="revealView"></div>
-        </div>
-    </div>
+        <section slot="end" class="dashboard-pane" aria-label="Dashboard">
+            <igc-navbar class="dashboard-bar">
+                <igc-icon slot="start" collection="app" name="layout-dashboard" aria-hidden="true"></igc-icon>
+                <h1>Dashboard</h1>
+            </igc-navbar>
+            <div class="dashboard-body">
+                <div id="revealView"></div>
+                <div class="dashboard-placeholder" id="dashboardPlaceholder">
+                    <igc-icon collection="app" name="layout-dashboard" aria-hidden="true"></igc-icon>
+                    <p>The dashboards you ask for appear here.</p>
+                </div>
+            </div>
+        </section>
+    </igc-splitter>
 
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
@@ -56,7 +71,54 @@
     <script src="https://dl.revealbi.io/reveal/libs/1.8.4/infragistics.reveal.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@revealbi/api@1.3.0/dist/index.umd.js"></script>
 
-    <script type="text/javascript">
+    <script type="module">
+        import {
+            defineComponents,
+            registerIconFromText,
+            setIconRef,
+            IgcAccordionComponent,
+            IgcAvatarComponent,
+            IgcBadgeComponent,
+            IgcButtonComponent,
+            IgcChatComponent,
+            IgcChipComponent,
+            IgcExpansionPanelComponent,
+            IgcIconComponent,
+            IgcNavbarComponent,
+            IgcSplitterComponent,
+        } from 'https://cdn.jsdelivr.net/npm/igniteui-webcomponents@7.4.1/+esm';
+
+        defineComponents(
+            IgcAccordionComponent,
+            IgcAvatarComponent,
+            IgcBadgeComponent,
+            IgcButtonComponent,
+            IgcChatComponent,
+            IgcChipComponent,
+            IgcExpansionPanelComponent,
+            IgcIconComponent,
+            IgcNavbarComponent,
+            IgcSplitterComponent,
+        );
+
+        // Icons (Lucide, ISC license) registered in the "app" collection. `fill:none` is inline
+        // because igc-icon's own stylesheet fills SVGs, which beats a presentation attribute.
+        const icons = {
+            'sparkles': '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>',
+            'arrow-up': '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
+            'rotate-ccw': '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+            'chevron-down': '<path d="m6 9 6 6 6-6"/>',
+            'layout-dashboard': '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+            'circle-alert': '<circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
+        };
+        for (const [name, paths] of Object.entries(icons)) {
+            registerIconFromText(name,
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="fill:none" stroke="currentColor" ' +
+                `stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`, 'app');
+        }
+        // The chat's built-in send button uses the "send_message" icon reference; point it at arrow-up.
+        setIconRef('send_message', 'default', { name: 'arrow-up', collection: 'app' });
+
         // Configure Reveal SDK
         $.ig.RevealSdkSettings.setBaseUrl("http://localhost:5112/");
 
@@ -67,17 +129,19 @@
 
         const client = rv.RevealSdkClient.getInstance();
         let revealView;
-        let streamedExplanation = '';
+        let busy = false;
+        let totalTokens = 0;
 
         // DOM Elements
-        const chatMessages = document.getElementById('chatMessages');
-        const chatInput = document.getElementById('chatInput');
-        const sendButton = document.getElementById('sendButton');
-        const suggestedQuestionsContainer = document.getElementById('suggestedQuestions');
-        const suggestionsPanel = document.getElementById('suggestionsPanel');
-        const suggestionsContent = document.getElementById('suggestionsContent');
-        const suggestionsHeader = document.getElementById('suggestionsHeader');
-        const suggestionsToggle = document.getElementById('suggestionsToggle');
+        const chat = document.getElementById('chat');
+        const tokensBadge = document.getElementById('tokensBadge');
+        const newChatButton = document.getElementById('newChatButton');
+        const starterPrompts = document.getElementById('starterPrompts');
+        const moreExamplesButton = document.getElementById('moreExamplesButton');
+        const exampleCategories = document.getElementById('exampleCategories');
+        const tipsToggle = document.getElementById('tipsToggle');
+        const tips = document.getElementById('tips');
+        const dashboardPlaceholder = document.getElementById('dashboardPlaceholder');
 
         // Initial dashboard creation questions (always visible)
         const initialQuestions = [
@@ -88,7 +152,7 @@
             "Build a dashboard with total revenue, total gross margin, and average revenue per company"
         ];
 
-        // Categorized questions (shown when user clicks "Show more examples")
+        // Categorized questions (shown when user clicks "More examples")
         const categorizedQuestions = {
             "Time-Series & Trends": [
                 "Show a line chart of revenue over time, grouped by year",
@@ -134,77 +198,197 @@
             ]
         };
 
+        // A selection of questions shown as "Try asking" chips once the conversation has started
+        const quickSuggestions = [
+            ...initialQuestions.slice(0, 3),
+            ...categorizedQuestions['Time-Series & Trends'].slice(0, 2),
+            ...categorizedQuestions['Company Analysis'].slice(0, 2),
+            ...categorizedQuestions['Geographic Analysis'].slice(0, 1)
+        ];
+
+        // Styles for the message content below. The chat renders each message inside its own shadow
+        // root, where styles.css doesn't reach, so this sheet is adopted into those roots.
+        const contentStyles = new CSSStyleSheet();
+        contentStyles.replaceSync(`
+            .turn { display: flex; gap: 0.75rem; align-items: flex-start; color: #1e293b; font-size: 14px; line-height: 1.65; }
+            .turn-body { flex: 1; min-width: 0; }
+            .assistant-avatar { flex-shrink: 0; --ig-avatar-background: #f5f3ff; --ig-avatar-color: #7c3aed; --ig-icon-size: 16px; }
+            .assistant-avatar::part(base) { width: 1.75rem; height: 1.75rem; min-width: 1.75rem; }
+            .progress { display: flex; align-items: center; gap: 0.5rem; min-height: 1.75rem; color: #64748b; font-size: 13px; }
+            .progress[hidden], .meta[hidden] { display: none; }
+            .pulse { width: 0.375rem; height: 0.375rem; border-radius: 50%; background: #8b5cf6; animation: pulse 1.2s ease-in-out infinite; }
+            @keyframes pulse { 50% { opacity: 0.3; } }
+            .md > :first-child { margin-top: 0.125rem; }
+            .md > :last-child { margin-bottom: 0; }
+            .md p, .md ul, .md ol, .md pre, .md table { margin: 0 0 0.75em; }
+            .md ul, .md ol { padding-left: 1.25rem; }
+            .md li { margin: 0.25em 0; }
+            .md h1, .md h2, .md h3, .md h4 { margin: 1em 0 0.5em; font-size: 15px; font-weight: 600; line-height: 1.4; }
+            .md strong { font-weight: 600; color: #0f172a; }
+            .md code { padding: 0.125rem 0.375rem; border-radius: 0.25rem; background: #f1f5f9; font-size: 0.9em; }
+            .md pre { overflow-x: auto; padding: 0.75rem; border-radius: 0.5rem; background: #f8fafc; }
+            .md pre code { padding: 0; background: none; }
+            .md table { border-collapse: collapse; font-size: 13px; }
+            .md th, .md td { padding: 0.375rem 0.625rem; border: 1px solid #e2e8f0; text-align: left; }
+            .meta { margin-top: 0.5rem; color: #64748b; font-size: 12px; }
+            .error { display: flex; gap: 0.5rem; align-items: flex-start; padding: 0.625rem 0.875rem; border: 1px solid #fecaca; border-radius: 0.75rem; background: #fef2f2; color: #b91c1c; font-size: 13px; line-height: 1.5; --ig-icon-size: 16px; }
+            .error igc-icon { flex-shrink: 0; margin-top: 0.125rem; }
+        `);
+
+        function adoptContentStyles(element) {
+            // Runs once the chat has placed the element in the message's shadow root.
+            queueMicrotask(() => {
+                const root = element.getRootNode();
+                if (root instanceof ShadowRoot && !root.adoptedStyleSheets.includes(contentStyles)) {
+                    root.adoptedStyleSheets = [...root.adoptedStyleSheets, contentStyles];
+                }
+            });
+        }
+
+        // Assistant and error messages are elements we build once and then update in place while the
+        // answer streams in. Keyed by chat message id.
+        const turns = new Map();
+
+        function createAssistantTurn() {
+            const element = document.createElement('div');
+            element.className = 'turn';
+            element.innerHTML = `
+                <igc-avatar class="assistant-avatar" shape="rounded" aria-hidden="true">
+                    <igc-icon collection="app" name="sparkles"></igc-icon>
+                </igc-avatar>
+                <div class="turn-body">
+                    <div class="progress" role="status"><span class="pulse"></span><span class="progress-text">Thinking…</span></div>
+                    <div class="md"></div>
+                    <div class="meta" hidden></div>
+                </div>`;
+            return {
+                element,
+                progress: element.querySelector('.progress'),
+                progressText: element.querySelector('.progress-text'),
+                text: element.querySelector('.md'),
+                meta: element.querySelector('.meta'),
+            };
+        }
+
+        function createErrorTurn(message) {
+            const element = document.createElement('div');
+            element.className = 'error';
+            element.setAttribute('role', 'alert');
+            element.innerHTML = '<igc-icon collection="app" name="circle-alert" aria-hidden="true"></igc-icon><span></span>';
+            element.querySelector('span').textContent = message;
+            return { element };
+        }
+
+        // igc-chat `messageContent` renderer: the user's messages render as plain text in the chat's
+        // own bubble, assistant and error messages render the elements above.
+        function renderMessageContent({ message }) {
+            const turn = turns.get(message.id);
+            if (!turn) return message.text;
+            adoptContentStyles(turn.element);
+            return turn.element;
+        }
+
+        const chatOptions = {
+            currentUserId: 'user',
+            disableInputAttachments: true,
+            inputPlaceholder: 'Ask me anything about your data…',
+            suggestions: [],
+            // Below the input, so the chips come after the input both on screen and in tab order.
+            suggestionsPosition: 'below-input',
+            renderers: {
+                messageContent: renderMessageContent,
+                messageActions: () => '',
+            },
+        };
+        chat.options = chatOptions;
+
+        let nextId = 0;
+        function addMessage(sender, text = '') {
+            const message = { id: `${sender}-${++nextId}`, sender, text, timestamp: new Date().toISOString() };
+            if (sender === 'assistant') turns.set(message.id, createAssistantTurn());
+            if (sender === 'error') turns.set(message.id, createErrorTurn(text));
+            chat.messages = [...chat.messages, message];
+            return message;
+        }
+
+        function removeMessage(id) {
+            chat.messages = chat.messages.filter(message => message.id !== id);
+            turns.delete(id);
+        }
+
+        function scrollToLatest() {
+            const last = chat.messages.at(-1);
+            if (last) chat.scrollToMessage(last.id);
+        }
+
         // Initialize suggested questions
+        function createPromptButton(question, className, variant) {
+            const button = document.createElement('igc-button');
+            button.className = `${className} prompt`;
+            button.variant = variant;
+            button.textContent = question;
+            button.addEventListener('click', () => sendQuestion(question));
+            return button;
+        }
+
         function initializeSuggestedQuestions() {
-            // Add initial questions
             initialQuestions.forEach(question => {
-                const button = document.createElement('button');
-                button.className = 'suggested-question';
-                button.textContent = question;
-                button.addEventListener('click', () => {
-                    chatInput.value = question;
-                    handleSendChat();
-                });
-                suggestedQuestionsContainer.appendChild(button);
+                starterPrompts.appendChild(createPromptButton(question, 'prompt-card', 'outlined'));
             });
 
-            // Add "Show more" button
-            const showMoreBtn = document.createElement('button');
-            showMoreBtn.className = 'show-more-btn';
-            showMoreBtn.textContent = 'Show more examples...';
-            showMoreBtn.addEventListener('click', toggleCategorizedQuestions);
-            suggestedQuestionsContainer.appendChild(showMoreBtn);
-
-            // Create categorized questions container (hidden initially)
-            const categoriesContainer = document.createElement('div');
-            categoriesContainer.className = 'question-categories';
-            categoriesContainer.id = 'questionCategories';
-
-            Object.keys(categorizedQuestions).forEach(category => {
-                const categoryDiv = document.createElement('div');
-                categoryDiv.className = 'question-category';
-
-                const categoryHeader = document.createElement('div');
-                categoryHeader.className = 'category-header';
-                categoryHeader.textContent = category;
-                categoryDiv.appendChild(categoryHeader);
-
-                categorizedQuestions[category].forEach(question => {
-                    const button = document.createElement('button');
-                    button.className = 'suggested-question';
-                    button.textContent = question;
-                    button.addEventListener('click', () => {
-                        chatInput.value = question;
-                        handleSendChat();
-                    });
-                    categoryDiv.appendChild(button);
-                });
-
-                categoriesContainer.appendChild(categoryDiv);
+            Object.entries(categorizedQuestions).forEach(([category, questions]) => {
+                const panel = document.createElement('igc-expansion-panel');
+                const title = document.createElement('span');
+                title.slot = 'title';
+                title.textContent = category;
+                const list = document.createElement('div');
+                list.className = 'example-list';
+                questions.forEach(question => list.appendChild(createPromptButton(question, 'example', 'flat')));
+                panel.append(title, list);
+                exampleCategories.appendChild(panel);
             });
 
-            suggestedQuestionsContainer.appendChild(categoriesContainer);
+            moreExamplesButton.addEventListener('click', () => {
+                const expanded = exampleCategories.hidden;
+                exampleCategories.hidden = !expanded;
+                moreExamplesButton.setAttribute('aria-expanded', String(expanded));
+            });
         }
 
-        // Toggle categorized questions visibility
-        function toggleCategorizedQuestions() {
-            const categoriesContainer = document.getElementById('questionCategories');
-            const showMoreBtn = document.querySelector('.show-more-btn');
-            
-            if (categoriesContainer.classList.contains('visible')) {
-                categoriesContainer.classList.remove('visible');
-                showMoreBtn.textContent = 'Show more examples...';
-            } else {
-                categoriesContainer.classList.add('visible');
-                showMoreBtn.textContent = 'Show less';
-                // Scroll to top to show the categories
-                setTimeout(() => {
-                    chatMessages.scrollTop = 0;
-                }, 100);
-            }
+        // Initialize persistent "Try asking" suggestions (shown once the conversation starts)
+        function initializePersistentSuggestions() {
+            quickSuggestions.forEach(question => {
+                const chip = document.createElement('igc-chip');
+                chip.className = 'tip prompt';
+                chip.textContent = question;
+                chip.title = question; // Show full text on hover
+                chip.addEventListener('click', () => {
+                    // Put the question in the input so it can be edited before sending
+                    chat.draftMessage = { text: question };
+                });
+                tips.appendChild(chip);
+            });
+
+            tipsToggle.addEventListener('click', () => {
+                const expanded = tips.hidden;
+                tips.hidden = !expanded;
+                tipsToggle.setAttribute('aria-expanded', String(expanded));
+            });
         }
 
-        // Initialize RevealView
+        function showPersistentSuggestions() {
+            if (chatOptions.suggestions.length) return;
+            chatOptions.suggestions = quickSuggestions;
+            chat.options = { ...chatOptions };
+        }
+
+        function setBusy(value) {
+            busy = value;
+            // The chat input stays editable; sending is blocked in the igcMessageCreated handler.
+            document.querySelectorAll('.prompt').forEach(element => element.disabled = value);
+        }
+
+        // Initialize RevealView. Created with the first dashboard, so the placeholder shows until then.
         function initializeDashboard() {
             revealView = new $.ig.RevealView("#revealView");
             revealView.canEdit = false;
@@ -213,125 +397,36 @@
             revealView.canCopyVisualization = false;
         }
 
-        initializeDashboard();
-        initializeSuggestedQuestions();
-        initializePersistentSuggestions();
-
-        // Initialize persistent suggestions panel
-        function initializePersistentSuggestions() {
-            // Combine a selection of questions for quick access
-            const quickSuggestions = [
-                ...initialQuestions.slice(0, 3),
-                ...categorizedQuestions['Time-Series & Trends'].slice(0, 2),
-                ...categorizedQuestions['Company Analysis'].slice(0, 2),
-                ...categorizedQuestions['Geographic Analysis'].slice(0, 1)
-            ];
-
-            quickSuggestions.forEach(question => {
-                const chip = document.createElement('button');
-                chip.className = 'suggestion-chip';
-                chip.textContent = question;
-                chip.title = question; // Show full text on hover
-                chip.addEventListener('click', () => {
-                    chatInput.value = question;
-                    chatInput.focus();
-                });
-                suggestionsContent.appendChild(chip);
-            });
-
-            // Toggle suggestions panel
-            suggestionsHeader.addEventListener('click', () => {
-                suggestionsContent.classList.toggle('collapsed');
-                suggestionsToggle.classList.toggle('collapsed');
-            });
-        }
-
-        // Show persistent suggestions panel when conversation starts
-        function showPersistentSuggestions() {
-            suggestionsPanel.classList.add('visible');
-        }
-
-        // Add chat message to UI
-        function addChatMessage(role, content) {
-            // Remove empty state if present
-            const emptyState = chatMessages.querySelector('.empty-state');
-            if (emptyState) {
-                emptyState.remove();
-                showPersistentSuggestions();
-            }
-
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'chat-message';
-
-            const avatarDiv = document.createElement('div');
-            avatarDiv.className = `message-avatar ${role}-avatar`;
-            
-            const avatarIcons = {
-                user: '👤',
-                assistant: '🤖',
-                system: '⚙️',
-                log: '📝',
-                error: '⚠️'
-            };
-            avatarDiv.textContent = avatarIcons[role] || '💬';
-
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-
-            const roleDiv = document.createElement('div');
-            roleDiv.className = 'message-role';
-            roleDiv.textContent = role === 'assistant' ? 'AI Assistant' : role;
-
-            const textDiv = document.createElement('div');
-            textDiv.className = `message-text ${role}`;
-            textDiv.innerHTML = content;
-
-            contentDiv.appendChild(roleDiv);
-            contentDiv.appendChild(textDiv);
-            messageDiv.appendChild(avatarDiv);
-            messageDiv.appendChild(contentDiv);
-            chatMessages.appendChild(messageDiv);
-
-            // Auto-scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            return textDiv;
-        }
-
-        // Create streaming message placeholder
-        function createStreamingMessage() {
-            const textDiv = addChatMessage('assistant', '');
-            textDiv.classList.add('streaming');
-            return textDiv;
-        }
-
         // Load dashboard from JSON response
         async function loadDashboardFromResponse(dashboardJson) {
             try {
                 const json = JSON.parse(dashboardJson);
+                if (!revealView) {
+                    dashboardPlaceholder.hidden = true;
+                    initializeDashboard();
+                }
                 revealView.dashboard = await $.ig.RevealUtility.createDashboardFromJsonObject(json);
             } catch (e) {
                 console.error('Failed to load dashboard:', e);
-                addChatMessage('error', 'Failed to load dashboard: ' + e.message);
+                addMessage('error', 'Failed to load dashboard: ' + e.message);
             }
         }
 
-        // Handle send chat message
-        async function handleSendChat() {
-            if (!chatInput || !chatInput.value.trim()) return;
+        // Send a question that didn't come from the chat input (starter prompts and examples)
+        function sendQuestion(question) {
+            if (busy) return;
+            addMessage('user', question);
+            handleSendChat(question);
+        }
 
-            const question = chatInput.value.trim();
-            chatInput.value = '';
-            chatInput.style.height = 'auto';
+        // Handle send chat message. The user's message is already in the chat.
+        async function handleSendChat(question) {
+            setBusy(true);
+            showPersistentSuggestions();
 
-            // Disable send button during processing
-            sendButton.disabled = true;
-
-            addChatMessage('user', question);
-
-            // Reset streamed explanation for new message
-            streamedExplanation = '';
-            let streamingMessageDiv = null;
+            const assistantMessage = addMessage('assistant');
+            const turn = turns.get(assistantMessage.id);
+            let streamedExplanation = '';
 
             // A failed request is reported by the stream, the final result and the rejected promise;
             // show only the first so the user sees the error once.
@@ -339,33 +434,28 @@
             const showError = (message) => {
                 if (errorShown) return;
                 errorShown = true;
-                addChatMessage('error', message);
+                addMessage('error', String(message));
             };
 
             try {
                 const stream = await client.ai.chat.sendMessage({
                     message: question,
                     datasourceId: 'SampleExcel',
-                    dashboard: revealView.dashboard,
+                    dashboard: revealView?.dashboard,
                     stream: true,
                 });
 
                 stream.on('progress', (message) => {
-                    // Show progress messages as log entries
-                    addChatMessage('log', message);
+                    // Show the latest progress message until the answer starts streaming
+                    turn.progressText.textContent = message;
                 });
 
                 stream.on('text', (chunk) => {
                     // Handle streaming text chunks (like ChatGPT)
                     streamedExplanation += chunk;
-
-                    // Create or update the streaming message div
-                    if (!streamingMessageDiv) {
-                        streamingMessageDiv = createStreamingMessage();
-                    }
-                    // Update the content with parsed markdown
-                    streamingMessageDiv.innerHTML = marked.parse(streamedExplanation);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    turn.progress.hidden = true;
+                    turn.text.innerHTML = marked.parse(streamedExplanation);
+                    scrollToLatest();
                 });
 
                 stream.on('error', (error) => {
@@ -374,17 +464,11 @@
                 });
 
                 const result = await stream.finalResponse();
-
-                // Mark the streaming div as complete
-                if (streamingMessageDiv) {
-                    streamingMessageDiv.classList.remove('streaming');
-                    streamingMessageDiv.classList.add('completed');
-                }
+                turn.progress.hidden = true;
 
                 // Handle case where no streaming occurred (fallback to final response)
-                if (!streamingMessageDiv && result.explanation) {
-                    const htmlContent = marked.parse(result.explanation);
-                    addChatMessage('assistant', htmlContent);
+                if (!streamedExplanation && result.explanation) {
+                    turn.text.innerHTML = marked.parse(result.explanation);
                 }
 
                 if (result.error) {
@@ -394,9 +478,15 @@
                 // Display finishReason and token usage
                 if (result.finishReason || result.usage) {
                     const metaInfo = [];
-                    if (result.finishReason) metaInfo.push(`Finish reason: <strong>${result.finishReason}</strong>`);
-                    if (result.usage) metaInfo.push(`Tokens: <strong>${result.usage.inputTokens}</strong> in / <strong>${result.usage.outputTokens}</strong> out`);
-                    addChatMessage('log', metaInfo.join(' &nbsp;|&nbsp; '));
+                    if (result.finishReason) metaInfo.push(`Finish reason: ${result.finishReason}`);
+                    if (result.usage) {
+                        metaInfo.push(`Tokens: ${result.usage.inputTokens} in / ${result.usage.outputTokens} out`);
+                        totalTokens += result.usage.inputTokens + result.usage.outputTokens;
+                        tokensBadge.textContent = `${totalTokens.toLocaleString()} tokens`;
+                        tokensBadge.hidden = false;
+                    }
+                    turn.meta.textContent = metaInfo.join(' · ');
+                    turn.meta.hidden = false;
                 }
 
                 // Load dashboard if present
@@ -406,30 +496,55 @@
             } catch (error) {
                 showError(`Error: ${error.message}`);
             } finally {
-                // Re-enable send button
-                sendButton.disabled = false;
-                chatInput.focus();
+                // Drop the assistant message if the request failed before it produced anything
+                if (!turn.text.innerHTML && turn.meta.hidden) {
+                    removeMessage(assistantMessage.id);
+                } else {
+                    turn.progress.hidden = true;
+                }
+                setBusy(false);
+                scrollToLatest();
+            }
+        }
+
+        // Start over: clear the conversation and the AI's server-side context
+        async function startNewChat() {
+            if (busy) return;
+            chat.messages = [];
+            turns.clear();
+            chat.draftMessage = { text: '' };
+            chatOptions.suggestions = [];
+            chat.options = { ...chatOptions };
+            totalTokens = 0;
+            tokensBadge.hidden = true;
+            // Drop the dashboard too, so the next question doesn't build on it
+            if (revealView) {
+                revealView = undefined;
+                document.getElementById('revealView').replaceChildren();
+                dashboardPlaceholder.hidden = false;
+            }
+            try {
+                await client.ai.chat.resetContext();
+            } catch (error) {
+                console.error('Failed to reset the chat context:', error);
             }
         }
 
         // Event listeners
-        sendButton.addEventListener('click', handleSendChat);
-
-        chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+        chat.addEventListener('igcMessageCreated', (e) => {
+            const question = e.detail.text.trim();
+            // Cancelling keeps the text in the input, so nothing is lost while an answer is in progress
+            if (busy || !question) {
                 e.preventDefault();
-                handleSendChat();
+                return;
             }
+            handleSendChat(question);
         });
 
-        // Auto-resize textarea
-        chatInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 200) + 'px';
-        });
+        newChatButton.addEventListener('click', startNewChat);
 
-        // Focus input on load
-        chatInput.focus();
+        initializeSuggestedQuestions();
+        initializePersistentSuggestions();
     </script>
 </body>
 
