@@ -10,9 +10,9 @@ This guide will walk you through setting up the Reveal AI Add-On in your existin
 
 | Platform | Package | Minimum Reveal Version |
 |---|---|---|
-| [ASP.NET Core (C#)](#aspnet-core-c) | `Reveal.Sdk.AI.AspNetCore` (NuGet) | 2.2.0+ |
-| [Node.js](#nodejs) | `reveal-sdk-node-ai` (npm) | 2.2.0+ |
-| [Java](#java) | `io.revealbi:reveal-sdk-ai` (Maven) | 2.2.0+ |
+| [ASP.NET Core (C#)](#aspnet-core-c) | `Reveal.Sdk.AI.AspNetCore` (NuGet) | 2.3.0+ |
+| [Node.js](#nodejs) | `reveal-sdk-node-ai` (npm) | 2.3.0+ |
+| [Java](#java) | `io.revealbi:reveal-sdk-ai` (Maven) | 2.3.0+ |
 
 ---
 
@@ -24,7 +24,7 @@ The AI add-on is configured declaratively with **providers** and **profiles**:
 - A **profile** is a named choice of **which provider to use and which model** (plus optional sampling settings like `temperature`). Profiles are what clients and the engine select.
 - **`defaultProfile`** names the profile used when a request doesn't specify one.
 
-So a minimal setup is: one provider (`openai`) + one profile (`gpt-4.1`, pointing at that provider and model) set as the default. You can register several providers and many profiles (e.g. a fast model and a reasoning model) and let requests pick per call. The examples below each set up the minimal one-provider/one-profile case.
+So a minimal setup is: one provider (`openai`) + one profile (`gpt-5.6-luna`, pointing at that provider and model) set as the default. You can register several providers and many profiles (e.g. a fast model and a reasoning model) and let requests pick per call. The examples below each set up the minimal one-provider/one-profile case.
 
 > **Migrating from the pre-2.2 shape?** The old `defaultProvider` + `settings` (Node/Java) and `RevealAI:DefaultClient` + `RevealAI:<Provider>` (C#) style still works but is deprecated. Move the vendor connection to a **provider** and the model to a **profile** as shown below.
 
@@ -34,7 +34,7 @@ So a minimal setup is: one provider (`openai`) + one profile (`gpt-4.1`, pointin
 
 ### Prerequisites
 
-- ✅ **Reveal SDK v2.2.0+** installed and working in your ASP.NET Core app
+- ✅ **Reveal SDK v2.3.0+** installed and working in your ASP.NET Core app
 - ✅ **.NET 8.0 SDK** installed
 - ✅ **LLM Provider account** (OpenAI or Anthropic recommended)
 - ✅ At least one datasource configured in Reveal SDK
@@ -89,15 +89,15 @@ builder.Services.AddControllers()
     });
 
 // Add Reveal AI services: register the OpenAI provider connection, define a profile
-// (provider + model) named "gpt-4.1", and make it the default.
+// (provider + model) named "gpt-5.6-luna", and make it the default.
 builder.Services.AddRevealAI()
   .AddOpenAI(openai => openai.ApiKey = builder.Configuration["RevealAI:OpenAI:ApiKey"])
-  .AddProfile("gpt-4.1", profile =>
+  .AddProfile("gpt-5.6-luna", profile =>
   {
       profile.Provider = "openai";
-      profile.Model = "gpt-4.1";
+      profile.Model = "gpt-5.6-luna";
   })
-  .SetDefaultProfile("gpt-4.1")
+  .SetDefaultProfile("gpt-5.6-luna")
   .UseMetadataCatalogFile("config/catalog.json");
 
 var app = builder.Build();
@@ -164,7 +164,7 @@ The provider connection and profile are declared in code (Step 2); the only secr
 }
 ```
 
-The model (`gpt-4.1`) lives on the profile in `Program.cs`, not here.
+The model (`gpt-5.6-luna`) lives on the profile in `Program.cs`, not here.
 
 #### Option B: Anthropic Claude
 
@@ -262,7 +262,7 @@ curl -X GET http://localhost:5112/api/reveal/ai/metadata/status
 
 ### Prerequisites
 
-- ✅ **Reveal 2.2.0+** (`reveal-sdk-node`) installed and working
+- ✅ **Reveal 2.3.0+** (`reveal-sdk-node`) installed and working
 - ✅ **Node.js 16+**
 - ✅ **LLM Provider account** (OpenAI or Anthropic recommended)
 - ✅ At least one datasource configured in Reveal SDK
@@ -295,12 +295,12 @@ const revealOptions = {
   // ... your existing Reveal options
   plugins: [
     revealAI.withOptions({
-      defaultProfile: 'gpt-4.1',
+      defaultProfile: 'gpt-5.6-luna',
       providers: {
         openai: { type: 'OpenAI', apiKey: process.env.OPENAI_API_KEY }
       },
       profiles: {
-        'gpt-4.1': { provider: 'openai', model: 'gpt-4.1' }
+        'gpt-5.6-luna': { provider: 'openai', model: 'gpt-5.6-luna' }
       },
       metadataCatalogFile: path.resolve(__dirname, 'Reveal', 'Metadata', 'catalog.json'),
       metadataManager: {
@@ -340,9 +340,9 @@ Declare the vendor connection under `providers` (credentials + `type`) and the m
 
 ```javascript
 revealAI.withOptions({
-  defaultProfile: 'gpt-4.1',
+  defaultProfile: 'gpt-5.6-luna',
   providers: { openai: { type: 'OpenAI', apiKey: process.env.OPENAI_API_KEY } },
-  profiles:  { 'gpt-4.1': { provider: 'openai', model: 'gpt-4.1' } },
+  profiles:  { 'gpt-5.6-luna': { provider: 'openai', model: 'gpt-5.6-luna' } },
   // ...metadataCatalogFile, metadataManager
 });
 ```
@@ -389,7 +389,7 @@ curl -X GET http://localhost:5112/api/reveal/ai/metadata/status
 
 ### Prerequisites
 
-- ✅ **Reveal 2.2.0+** (`io.revealbi:reveal-sdk-servlet` or Spring equivalent) installed and working
+- ✅ **Reveal 2.3.0+** (`io.revealbi:reveal-sdk-servlet` or Spring equivalent) installed and working
 - ✅ **Java 17+**
 - ✅ **Maven 3.6+**
 - ✅ **LLM Provider account** (OpenAI or Anthropic recommended)
@@ -408,21 +408,21 @@ Add the Reveal Maven repository and dependency to your `pom.xml`:
 </repositories>
 
 <dependencies>
-  <!-- The base Reveal Java SDK must be 2.2.0+ to match the AI plugin's engine -->
+  <!-- The base Reveal Java SDK must be 2.3.0+ to match the AI plugin's engine -->
   <dependency>
     <groupId>io.revealbi</groupId>
     <artifactId>reveal-sdk-servlet</artifactId>
-    <version>2.2.0</version>
+    <version>2.3.0</version>
   </dependency>
   <dependency>
     <groupId>io.revealbi</groupId>
     <artifactId>reveal-sdk-ai</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
   </dependency>
 </dependencies>
 ```
 
-> **Important:** keep `reveal-sdk-servlet` at **2.2.0+**. The AI plugin ships an engine built for 2.2.0; an older base SDK (e.g. 2.1.0) pulls a mismatched engine and the plugin fails to load at startup.
+> **Important:** keep `reveal-sdk-servlet` at **2.3.0+**. The AI plugin is built for the 2.3.0 engine; an older base SDK (e.g. 2.2.0) pulls a mismatched engine and the plugin fails to load at startup.
 
 Then run:
 
@@ -451,9 +451,9 @@ import java.nio.file.Path;
 import java.util.Map;
 
 RevealAIPluginOptions aiPluginOptions = RevealAIPluginOptions.builder()
-    .defaultProfile("gpt-4.1")
+    .defaultProfile("gpt-5.6-luna")
     .addProvider("openai", Map.of("type", "OpenAI", "apiKey", System.getenv("OPENAI_API_KEY")))
-    .addProfile("gpt-4.1", Map.of("provider", "openai", "model", "gpt-4.1"))
+    .addProfile("gpt-5.6-luna", Map.of("provider", "openai", "model", "gpt-5.6-luna"))
     .metadataCatalogFile(Path.of("src", "main", "resources", "Reveal", "Metadata", "catalog.json")
         .toAbsolutePath().normalize().toString())
     .metadataManager(new RevealAIPluginOptions.MetadataManagerOptions(
@@ -461,6 +461,8 @@ RevealAIPluginOptions aiPluginOptions = RevealAIPluginOptions.builder()
     .build();
 
 IRevealServer revealServer = new RevealServerBuilder()
+    // AI requests can run for minutes; raise the engine-request timeout from its 60-second default
+    .addSettings(settings -> settings.setAdvancedSetting("jetty.timeout", 300000L))
     .setDataSourceProvider(dataSourceProvider)
     .addPlugin(RevealAIPlugin.withOptions(aiPluginOptions))
     .build();
@@ -495,9 +497,9 @@ Declare the vendor connection with `addProvider(...)` (credentials + `"type"`) a
 
 ```java
 RevealAIPluginOptions.builder()
-    .defaultProfile("gpt-4.1")
+    .defaultProfile("gpt-5.6-luna")
     .addProvider("openai", Map.of("type", "OpenAI", "apiKey", System.getenv("OPENAI_API_KEY")))
-    .addProfile("gpt-4.1", Map.of("provider", "openai", "model", "gpt-4.1"))
+    .addProfile("gpt-5.6-luna", Map.of("provider", "openai", "model", "gpt-5.6-luna"))
     // ...metadataCatalogFile, metadataManager
     .build();
 ```
@@ -677,7 +679,7 @@ const forecast = await client.ai.insights.get({
 
 ### Java
 
-- [ ] `io.revealbi:reveal-sdk-ai` (1.2.0+) Maven dependency added, with `reveal-sdk-servlet` at **2.2.0+**
+- [ ] `io.revealbi:reveal-sdk-ai` (1.3.0+) Maven dependency added, with `reveal-sdk-servlet` at **2.3.0+**
 - [ ] `RevealAIPlugin.withOptions(aiPluginOptions)` added via `RevealServerBuilder.addPlugin()`
 - [ ] Metadata catalog JSON file configured with datasource list
 - [ ] `addProvider(...)` declares each vendor connection (`"type"` + `"apiKey"`)

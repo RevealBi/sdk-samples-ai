@@ -31,11 +31,11 @@ public class Application {
         if (apiKey == null) apiKey = "YOUR_API_KEY_HERE";
 
         // Declarative "profiles" configuration: a named provider connection (openai) carries
-        // the credentials; a profile (gpt-4.1) selects the model and is used as the default.
+        // the credentials; a profile (gpt-5.6-luna) selects the model and is used as the default.
         RevealAIPluginOptions aiPluginOptions = RevealAIPluginOptions.builder()
-                .defaultProfile("gpt-4.1")
+                .defaultProfile("gpt-5.6-luna")
                 .addProvider("openai", Map.of("type", "OpenAI", "apiKey", apiKey))
-                .addProfile("gpt-4.1", Map.of("provider", "openai", "model", "gpt-4.1"))
+                .addProfile("gpt-5.6-luna", Map.of("provider", "openai", "model", "gpt-5.6-luna"))
                 .metadataCatalogFile(Path.of("src", "main", "resources", "Reveal", "Metadata", "catalog.json")
                         .toAbsolutePath().normalize().toString())
                 .metadataManager(new RevealAIPluginOptions.MetadataManagerOptions(
@@ -43,8 +43,13 @@ public class Application {
                 .build();
 
         return new RevealServerBuilder()
-                .addSettings(settings -> settings.setLocalFilesStoragePath(
-                        Path.of("Data").toAbsolutePath().normalize().toString()))
+                .addSettings(settings -> {
+                    settings.setLocalFilesStoragePath(
+                            Path.of("Data").toAbsolutePath().normalize().toString());
+                    // AI requests (dashboard generation, insights) can run for minutes, so raise the
+                    // servlet's engine-request timeout from its 60-second default.
+                    settings.setAdvancedSetting("jetty.timeout", 300000L);
+                })
                 .setDashboardProvider(dashboardProvider)
                 .addPlugin(RevealAIPlugin.withOptions(aiPluginOptions))
                 .build();
