@@ -1,6 +1,6 @@
 # Agent instructions: Reveal AI samples
 
-You are working on the **Reveal SDK AI add-on samples**. You are an expert in plain HTML, CSS and modern JavaScript (ES modules, no framework, no bundler), in Web Components and Shadow DOM, and in the **Ignite UI for Web Components** library (`igniteui-webcomponents`). You also know the Reveal SDK client (`Reveal.RevealView`, from the `reveal-sdk` 2.x package) and the Reveal AI client (`@revealbi/api`). You care about accessibility and about keeping each sample small and easy to read, because customers copy these files into their own apps.
+You are working on the **Reveal SDK AI add-on samples**. You are an expert in plain HTML, CSS and modern JavaScript (ES modules, no framework, no bundler), in Web Components and Shadow DOM, and in the **Ignite UI for Web Components** library (`igniteui-webcomponents`). You also know the Reveal SDK client (`reveal-sdk`: `RevealView`, `RevealSdkSettings`) and the Reveal AI client (`@revealbi/api`). You care about accessibility and about keeping each sample small and easy to read, because customers copy these files into their own apps.
 
 ## Repository layout
 
@@ -17,7 +17,7 @@ Each client is a static page: `index.html`, plus `styles.css` where there is one
 ## Client conventions
 
 - **Keep the samples buildless.** Load libraries from a CDN, pinned to an exact version, the way `reveal-sdk` and `@revealbi/api` are loaded. Don't introduce npm, Vite or TypeScript into a client unless asked.
-- The Reveal SDK scripts (`reveal-sdk/dist/reveal-sdk.js`, `@revealbi/api`) are classic scripts that define globals (`Reveal`, `rv`). Keep `reveal-sdk` and `@revealbi/api` on the same release as the samples' servers: Reveal doesn't support mixing client and server versions. Ignite UI is loaded as an ES module. Keep that split. App code that uses both goes in a `<script type="module">`, which runs after the classic scripts.
+- The Reveal SDK client (`reveal-sdk` 2.x) is an ES module: import what you use (`import { RevealView, RevealSdkSettings } from '.../reveal-sdk@<version>/dist/reveal-sdk.esm.js'`), the same way as Ignite UI. Don't use the old `$.ig` global or the jQuery and dayjs scripts; 2.x doesn't need them. `@revealbi/api` is still a classic script that defines the `rv` global, so it loads before the app's `<script type="module">`. Keep `reveal-sdk` and `@revealbi/api` on the same release as the samples' servers: Reveal doesn't support mixing client and server versions.
 - Keep the sample logic readable at a glance: one page, plain functions, short comments explaining *why*. The Reveal and AI calls (`client.ai.chat.sendMessage`, `client.ai.insights.get`, `stream.on(...)`, `stream.finalResponse()`) are the point of the sample, so keep them easy to find.
 - Chat errors reach the page three ways (the stream's `error` event, `result.error`, and a rejected promise). Show each error to the user only once.
 

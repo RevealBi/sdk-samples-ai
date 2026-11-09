@@ -81,8 +81,6 @@
     </igc-nav-drawer>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/reveal-sdk@2.3.0/dist/reveal-sdk.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@revealbi/api@1.6.358/dist/index.umd.js"></script>
 
     <script type="module">
@@ -105,6 +103,8 @@
             IgcSplitterComponent,
             IgcTooltipComponent,
         } from 'https://cdn.jsdelivr.net/npm/igniteui-webcomponents@7.4.1/+esm';
+        import { RevealSdkSettings, RevealUtility, RevealView } from 'https://cdn.jsdelivr.net/npm/reveal-sdk@2.3.0/dist/reveal-sdk.esm.js';
+        import { marked } from 'https://cdn.jsdelivr.net/npm/marked@18.0.14/lib/marked.esm.js';
 
         defineComponents(
             IgcAccordionComponent,
@@ -145,7 +145,7 @@
         setIconRef('send_message', 'default', { name: 'arrow-up', collection: 'app' });
 
         // Configure Reveal SDK
-        Reveal.RevealSdkSettings.setBaseUrl("http://localhost:5112/");
+        RevealSdkSettings.setBaseUrl("http://localhost:5112/");
 
         // Initialize Reveal SDK Client
         rv.RevealSdkClient.initialize({
@@ -420,7 +420,7 @@
 
         // Initialize RevealView. Created with the first dashboard, so the placeholder shows until then.
         function initializeDashboard() {
-            revealView = new Reveal.RevealView("#revealView");
+            revealView = new RevealView("#revealView");
             revealView.canEdit = false;
             revealView.canSaveAs = false;
             revealView.showRefresh = false;
@@ -435,7 +435,7 @@
                     dashboardPlaceholder.hidden = true;
                     initializeDashboard();
                 }
-                revealView.dashboard = await Reveal.RevealUtility.createDashboardFromJsonObject(json);
+                revealView.dashboard = await RevealUtility.createDashboardFromJsonObject(json);
             } catch (e) {
                 console.error('Failed to load dashboard:', e);
                 addMessage('error', 'Failed to load dashboard: ' + e.message);

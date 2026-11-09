@@ -6,18 +6,18 @@ This document outlines the compatibility requirements and supported versions for
 
 ### Reveal SDK
 
-| Component | Minimum Version | Recommended | Notes |
+| Component | Minimum Version | Samples use | Notes |
 |-----------|----------------|-------------|-------|
-| **Reveal.Sdk.AspNetCore** | 1.8.3 | Latest | Core SDK for ASP.NET Core |
-| **Reveal.Sdk.Data** | 1.8.3 | Latest | Data provider support |
-| **Reveal.Sdk.Dom** | 0.1.668-beta | Latest | Dashboard object model (beta) |
-| **Reveal.Sdk.AI.AspNetCore** | **0.1.27-preview** | Latest | AI Add-On (private preview) |
-| **@revealbi/api** (npm) | **0.0.1-preview.2** | Latest | Client-side JavaScript API |
+| **Reveal.Sdk.AspNetCore** | 2.2.0 | 2.2.1 | Core SDK for ASP.NET Core |
+| **Reveal.Sdk.AI.AspNetCore** | 1.5.213 | 1.5.213 | AI Add-On for ASP.NET Core (NuGet) |
+| **reveal-sdk-node** / **reveal-sdk-node-ai** (npm) | 2.2.0 / 1.2.0 | 2.2.1 / 1.2.0 | Node.js server SDK and AI plugin |
+| **reveal-sdk-servlet** / **reveal-sdk-ai** (Maven) | 2.2.0 / 1.2.0 | 2.2.0 / 1.2.0 | Java server SDK and AI plugin |
+| **reveal-sdk** (npm) | 2.2.0 | 2.2.1 | Client-side `RevealView`, loaded as an ES module |
+| **@revealbi/api** (npm) | 1.3.0 | 1.3.0 | Client-side AI API |
 
 **Important**:
-- The AI Add-On requires **Reveal SDK 1.8.3 or higher**. Earlier versions are not supported.
-- **Private Preview**: NuGet packages are provided via zip file (not on public NuGet feed)
-- Client-side package is available on npm
+- The AI Add-On requires **Reveal SDK 2.2.0 or higher**, on the server and in the browser. Earlier versions are not supported.
+- The 2.x client no longer uses jQuery, dayjs or the `$.ig` global. Import `RevealView` and the other classes from `reveal-sdk` instead.
 
 ### .NET Framework
 
@@ -61,7 +61,7 @@ Before deploying to production, verify:
 
 ### Framework & SDK
 - [ ] .NET 8.0 SDK installed
-- [ ] Reveal SDK 1.8.3+ referenced
+- [ ] Reveal SDK 2.2.0+ referenced (server and client)
 - [ ] AI Add-On package installed
 - [ ] Application builds without errors
 

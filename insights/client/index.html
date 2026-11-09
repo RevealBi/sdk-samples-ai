@@ -61,8 +61,6 @@
         </section>
     </igc-splitter>
 
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/reveal-sdk@2.3.0/dist/reveal-sdk.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@revealbi/api@1.6.358/dist/index.umd.js"></script>
 
     <script type="module">
@@ -76,6 +74,8 @@
             IgcSplitterComponent,
             IgcSwitchComponent,
         } from 'https://cdn.jsdelivr.net/npm/igniteui-webcomponents@7.4.1/+esm';
+        import { RevealSdkSettings, RevealView, RVDashboard, RVMenuItem, RVMenuLocation } from 'https://cdn.jsdelivr.net/npm/reveal-sdk@2.3.0/dist/reveal-sdk.esm.js';
+        import { marked } from 'https://cdn.jsdelivr.net/npm/marked@18.0.14/lib/marked.esm.js';
 
         // IgcCardComponent also registers igc-card-header and igc-card-content
         defineComponents(
@@ -102,7 +102,7 @@
         }
 
         //set this to your server url
-        Reveal.RevealSdkSettings.setBaseUrl("http://localhost:5113/");
+        RevealSdkSettings.setBaseUrl("http://localhost:5113/");
 
         // Initialize once at app startup (e.g., in main.ts or App.tsx)
         rv.RevealSdkClient.initialize({
@@ -172,7 +172,7 @@
 
         // Helper function to create insight menu items
         function createInsightMenuItem(label, dashboard, insightType, visualization = null) {
-            return new Reveal.RVMenuItem(label, null, async () => {
+            return new RVMenuItem(label, null, async () => {
                 const request = ++currentRequest;
                 const isCurrent = () => request === currentRequest;
                 startInsight(label, visualization ? visualization.title : dashboard.title);
@@ -229,19 +229,19 @@
             });
         }
 
-        Reveal.RVDashboard.loadDashboard("Accounts").then((dashboard) => {
-            revealView = new Reveal.RevealView("#revealView");
+        RVDashboard.loadDashboard("Accounts", async (dashboard) => {
+            revealView = new RevealView("#revealView");
             revealView.canEdit = false;
             revealView.canSaveAs = false;
             revealView.showRefresh = false;
             revealView.canCopyVisualization = false;
             revealView.onMenuOpening = function (visualization, args) {
-                if (args.menuLocation === Reveal.RVMenuLocation.Dashboard) {
+                if (args.menuLocation === RVMenuLocation.Dashboard) {
                     args.menuItems.push(createInsightMenuItem("Dashboard Summary", dashboard, 'summary'));
                     args.menuItems.push(createInsightMenuItem("Dashboard Analysis", dashboard, 'analysis'));
                     args.menuItems.push(createInsightMenuItem("Dashboard Forecast", dashboard, 'forecast'));
                 }
-                if (args.menuLocation === Reveal.RVMenuLocation.Visualization) {
+                if (args.menuLocation === RVMenuLocation.Visualization) {
                     args.menuItems.push(createInsightMenuItem("Visualization Summary", dashboard, 'summary', visualization));
                     args.menuItems.push(createInsightMenuItem("Visualization Analysis", dashboard, 'analysis', visualization));
                     args.menuItems.push(createInsightMenuItem("Visualization Forecast", dashboard, 'forecast', visualization));
