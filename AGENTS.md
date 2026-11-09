@@ -17,7 +17,7 @@ Each client is a static page: `index.html`, plus `styles.css` where there is one
 ## Client conventions
 
 - **Keep the samples buildless.** Load libraries from a CDN, pinned to an exact version, the way `reveal-sdk` and `@revealbi/api` are loaded. Don't introduce npm, Vite or TypeScript into a client unless asked.
-- The Reveal SDK client (`reveal-sdk` 2.x) is an ES module: import what you use (`import { RevealView, RevealSdkSettings } from '.../reveal-sdk@<version>/dist/reveal-sdk.esm.js'`), the same way as Ignite UI. Don't use the old `$.ig` global or the jQuery and dayjs scripts; 2.x doesn't need them. `@revealbi/api` is still a classic script that defines the `rv` global, so it loads before the app's `<script type="module">`.
+- The Reveal SDK client (`reveal-sdk` 2.x) is an ES module: import what you use (`import { RevealView, RevealSdkSettings } from '.../reveal-sdk@<version>/dist/reveal-sdk.esm.js'`), the same way as Ignite UI. Don't use the old `$.ig` global or the jQuery and dayjs scripts; 2.x doesn't need them. `@revealbi/api` is still a classic script that defines the `rv` global, so it loads before the app's `<script type="module">`. Keep `reveal-sdk` and `@revealbi/api` on the same release as the samples' servers: Reveal doesn't support mixing client and server versions.
 - Keep the sample logic readable at a glance: one page, plain functions, short comments explaining *why*. The Reveal and AI calls (`client.ai.chat.sendMessage`, `client.ai.insights.get`, `stream.on(...)`, `stream.finalResponse()`) are the point of the sample, so keep them easy to find.
 - Chat errors reach the page three ways (the stream's `error` event, `result.error`, and a rejected promise). Show each error to the user only once.
 
