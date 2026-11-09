@@ -9,7 +9,7 @@
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",
-    "reveal-sdk-node": "^2.3.0",
+    "reveal-sdk-node": "2.3.0",
     "reveal-sdk-node-ai": "1.3.0"
   }
 }

@@ -229,7 +229,7 @@
             });
         }
 
-        RVDashboard.loadDashboard("Accounts", async (dashboard) => {
+        RVDashboard.loadDashboard("Accounts").then((dashboard) => {
             revealView = new RevealView("#revealView");
             revealView.canEdit = false;
             revealView.canSaveAs = false;
@@ -248,6 +248,11 @@
                 }
             };
             revealView.dashboard = dashboard;
+        }).catch((e) => {
+            // Without this, a server that is down leaves the pane blank
+            startInsight('Accounts', 'The dashboard failed to load');
+            insightProgress.hidden = true;
+            showError(e?.message ?? e);
         });
 
     </script>
