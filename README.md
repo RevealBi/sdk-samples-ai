@@ -417,7 +417,7 @@ Add the Reveal Maven repository and dependency to your `pom.xml`:
   <dependency>
     <groupId>io.revealbi</groupId>
     <artifactId>reveal-sdk-ai</artifactId>
-    <version>1.3.0</version>
+    <version>1.3.1</version>
   </dependency>
 </dependencies>
 ```
