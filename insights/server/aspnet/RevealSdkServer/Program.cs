@@ -11,15 +11,15 @@ builder.Services.AddControllers().AddReveal(builder =>
 
 // Declarative "profiles" configuration built in code (consistent with the Node and Java
 // samples): a named provider connection (openai) carries the credentials, and a profile
-// (gpt-4.1) selects the model and is set as the default.
+// (gpt-5.6-luna) selects the model and is set as the default.
 builder.Services.AddRevealAI()
     .AddOpenAI(openai => openai.ApiKey = builder.Configuration["RevealAI:OpenAI:ApiKey"])
-    .AddProfile("gpt-4.1", profile =>
+    .AddProfile("gpt-5.6-luna", profile =>
     {
         profile.Provider = "openai";
-        profile.Model = "gpt-4.1";
+        profile.Model = "gpt-5.6-luna";
     })
-    .SetDefaultProfile("gpt-4.1")
+    .SetDefaultProfile("gpt-5.6-luna")
     .UseMetadataCatalogFile("Reveal/Metadata/catalog.json");
 
 builder.Services.AddControllers();
