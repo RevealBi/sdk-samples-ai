@@ -10,8 +10,8 @@ This document outlines the compatibility requirements and supported versions for
 |-----------|----------------|-------------|-------|
 | **Reveal.Sdk.AspNetCore** | 2.3.0 | 2.3.0 | Core SDK for ASP.NET Core |
 | **Reveal.Sdk.AI.AspNetCore** | 1.6.358 | 1.6.358 | AI Add-On for ASP.NET Core (NuGet) |
-| **reveal-sdk-node** / **reveal-sdk-node-ai** (npm) | 2.3.0 / 1.3.0 | 2.3.0 / 1.3.1 | Node.js server SDK and AI plugin |
-| **reveal-sdk-servlet** / **reveal-sdk-ai** (Maven) | 2.3.0 / 1.3.0 | 2.3.0 / 1.3.1 | Java server SDK and AI plugin |
+| **reveal-sdk-node** / **reveal-sdk-node-ai** (npm) | 2.3.0 / 1.3.0 | 2.3.0 / 1.3.2 | Node.js server SDK and AI plugin |
+| **reveal-sdk-servlet** / **reveal-sdk-ai** (Maven) | 2.3.0 / 1.3.0 | 2.3.0 / 1.3.2 | Java server SDK and AI plugin |
 | **reveal-sdk** (npm) | 2.3.0 | 2.3.0 | Client-side `RevealView`, loaded as an ES module |
 | **@revealbi/api** (npm) | 1.6.358 | 1.6.358 | Client-side AI API |
 
